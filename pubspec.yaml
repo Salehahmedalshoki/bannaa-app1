@@ -1,7 +1,7 @@
 name: bannaa_app
-description: تطبيق بنّاء - حاسبة كميات الخرسانة وتقدير أسعار البناء
+description: تطبيق بنّاء - حاسبة كميات الخرسانة وتقدير أسعار البناء مع الإسقاط الجوي
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -19,7 +19,7 @@ dependencies:
   # إدارة الحالة
   provider: ^6.1.1
 
-  # قاعدة البيانات المحلية
+  # قاعدة البيانات المحلية (للـ Offline)
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 
@@ -31,13 +31,18 @@ dependencies:
   cupertino_icons: ^1.0.2
   share_plus: ^7.2.1
   path_provider: ^2.1.1
-  intl: 0.20.2
+  intl: ^0.20.2
 
-  # ══ Firebase (فعّله بعد إضافة google-services.json) ══════
-  # firebase_core: ^2.27.0
-  # firebase_auth: ^4.17.0
-  # google_sign_in: ^6.2.1
-  # cloud_firestore: ^4.15.0
+  # ══ Firebase ════════════════════════════════════════════
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  google_sign_in: ^6.2.1
+  cloud_firestore: ^5.4.4
+
+  # ══ ميزة الإسقاط الجوي ══════════════════════════════════
+  google_maps_flutter: ^2.9.0       # خرائط Google التفاعلية
+  geolocator: ^13.0.1               # تحديد الموقع الجغرافي
+  geocoding: ^3.0.0                 # تحويل العنوان ↔ إحداثيات
 
 dev_dependencies:
   flutter_test:

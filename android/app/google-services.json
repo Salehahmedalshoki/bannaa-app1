@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "711113852305",
+    "project_id": "bannaa-app",
+    "storage_bucket": "bannaa-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:711113852305:android:b45a085dcb3ca7bf384630",
+        "android_client_info": {
+          "package_name": "com.bannaa.bannaa_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "711113852305-v1df4itn8u4brt8dsre0eb2ks058nrbg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQwoDS3-7xiJcGq-4F1L55sz58x5ynrzU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "711113852305-v1df4itn8u4brt8dsre0eb2ks058nrbg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

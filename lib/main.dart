@@ -1,31 +1,28 @@
 // ══════════════════════════════════════════════════════════
-//  main.dart
-//  ⚠️ Firebase مُعطَّل مؤقتاً للتجربة الأولى
-//  لتفعيله: شغّل "flutterfire configure" وفكّ التعليق أدناه
+//  main.dart — ✅ Firebase مفعّل + ميزة الإسقاط الجوي
 // ══════════════════════════════════════════════════════════
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'firebase_options.dart';
 import 'providers/app_settings_provider.dart';
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
-import '../utils/app_localizations.dart';
+import 'utils/app_localizations.dart';
 import 'screens/splash_screen.dart';
-
-// ── لتفعيل Firebase أزل التعليق من السطرين التاليين ──────
-// import 'package:firebase_core/firebase_core.dart';
-// import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ── Firebase (فعّله بعد: flutterfire configure) ──────────
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  // ── تهيئة Firebase ────────────────────────────────────
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
+  // ── تهيئة التخزين المحلي (للـ Offline) ───────────────
   await StorageService.init();
 
   final settings = AppSettingsProvider();
@@ -54,8 +51,8 @@ class BannaaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<AppSettingsProvider>();
-    final locale   = settings.locale;
-    final isRtl    = locale.languageCode == 'ar';
+    final locale = settings.locale;
+    final isRtl = locale.languageCode == 'ar';
 
     return MaterialApp(
       title: 'بنّاء',
