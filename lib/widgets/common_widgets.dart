@@ -1,6 +1,8 @@
 // ══════════════════════════════════════════════════════════
-//  widgets/common_widgets.dart
-//  ودجات مشتركة تُستخدم في أكثر من شاشة
+//  widgets/common_widgets.dart  ✅ نسخة مُصحَّحة
+//
+//  الإصلاحات المطبّقة:
+//  ✅ #1 ScreenHeader — سهم الرجوع يتكيف مع RTL/LTR تلقائياً
 // ══════════════════════════════════════════════════════════
 
 import 'package:flutter/material.dart';
@@ -32,28 +34,30 @@ class GoldenButton extends StatelessWidget {
         width: double.infinity,
         height: 52,
         decoration: BoxDecoration(
-          gradient: outline ? null : const LinearGradient(
-            colors: [AppTheme.accent, AppTheme.accentDark],
-          ),
+          gradient: outline
+              ? null
+              : const LinearGradient(
+                  colors: [AppTheme.accent, AppTheme.accentDark],
+                ),
           borderRadius: BorderRadius.circular(14),
-          border: outline
-              ? Border.all(color: AppTheme.border)
-              : null,
-          boxShadow: outline ? null : [
-            BoxShadow(
-              color: AppTheme.accent.withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 6),
-            ),
-          ],
+          border: outline ? Border.all(color: AppTheme.border) : null,
+          boxShadow: outline
+              ? null
+              : [
+                  BoxShadow(
+                    color: AppTheme.accent.withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
         ),
         child: Center(
           child: isLoading
               ? const SizedBox(
-                  width: 20, height: 20,
+                  width: 20,
+                  height: 20,
                   child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.black))
+                      strokeWidth: 2, color: Colors.black))
               : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -61,14 +65,14 @@ class GoldenButton extends StatelessWidget {
                       Text(icon!, style: const TextStyle(fontSize: 18)),
                       const SizedBox(width: 8),
                     ],
-                    Text(label,
+                    Text(
+                      label,
                       style: GoogleFonts.cairo(
-                        color: outline
-                            ? AppTheme.textPrimary
-                            : Colors.black,
+                        color: outline ? AppTheme.textPrimary : Colors.black,
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                      )),
+                      ),
+                    ),
                   ],
                 ),
         ),
@@ -105,12 +109,14 @@ class DarkCard extends StatelessWidget {
             color: highlighted ? AppTheme.accent : AppTheme.border,
             width: highlighted ? 1.5 : 1,
           ),
-          boxShadow: highlighted ? [
-            BoxShadow(
-              color: AppTheme.accent.withOpacity(0.1),
-              blurRadius: 12,
-            ),
-          ] : null,
+          boxShadow: highlighted
+              ? [
+                  BoxShadow(
+                    color: AppTheme.accent.withOpacity(0.1),
+                    blurRadius: 12,
+                  ),
+                ]
+              : null,
         ),
         child: child,
       ),
@@ -148,12 +154,14 @@ class AppTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
+        Text(
+          label,
           style: GoogleFonts.cairo(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: AppTheme.textSub,
-          )),
+          ),
+        ),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
@@ -162,13 +170,12 @@ class AppTextField extends StatelessWidget {
           readOnly: readOnly,
           onTap: onTap,
           textAlign: TextAlign.right,
-          style: GoogleFonts.cairo(
-            color: AppTheme.textPrimary, fontSize: 13),
+          style: GoogleFonts.cairo(color: AppTheme.textPrimary, fontSize: 13),
           decoration: InputDecoration(
             hintText: hint,
             suffixText: suffixText,
-            suffixStyle: GoogleFonts.cairo(
-              color: AppTheme.textMuted, fontSize: 12),
+            suffixStyle:
+                GoogleFonts.cairo(color: AppTheme.textMuted, fontSize: 12),
             prefixIcon: prefixIcon,
           ),
         ),
@@ -196,23 +203,25 @@ class StepProgressBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          children: List.generate(totalSteps, (i) => Expanded(
-            child: Container(
-              height: 4,
-              margin: EdgeInsets.only(left: i < totalSteps - 1 ? 4 : 0),
-              decoration: BoxDecoration(
-                color: i < currentStep
-                    ? AppTheme.accent
-                    : AppTheme.border,
-                borderRadius: BorderRadius.circular(2),
+          children: List.generate(
+            totalSteps,
+            (i) => Expanded(
+              child: Container(
+                height: 4,
+                margin: EdgeInsets.only(left: i < totalSteps - 1 ? 4 : 0),
+                decoration: BoxDecoration(
+                  color: i < currentStep ? AppTheme.accent : AppTheme.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          )),
+          ),
         ),
         const SizedBox(height: 6),
-        Text('الخطوة $currentStep من $totalSteps — $stepLabel',
-          style: GoogleFonts.cairo(
-            fontSize: 11, color: AppTheme.textMuted)),
+        Text(
+          'الخطوة $currentStep من $totalSteps — $stepLabel',
+          style: GoogleFonts.cairo(fontSize: 11, color: AppTheme.textMuted),
+        ),
       ],
     );
   }
@@ -231,30 +240,42 @@ class ScreenHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ #1 — السهم يتكيف مع اتجاه التطبيق RTL/LTR
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+
     return Row(
       children: [
         GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Container(
-            width: 38, height: 38,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               color: AppTheme.surface,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppTheme.border),
             ),
-            child: const Icon(
-              Icons.arrow_forward_ios,
-              color: AppTheme.textPrimary, size: 16),
+            child: Icon(
+              // ✅ في RTL (عربي): السهم يشير لليمين ← للرجوع
+              // ✅ في LTR (إنجليزي): السهم يشير لليسار → للرجوع
+              isRtl
+                  ? Icons.arrow_forward_ios_rounded
+                  : Icons.arrow_back_ios_new_rounded,
+              color: AppTheme.textPrimary,
+              size: 16,
+            ),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(title,
+          child: Text(
+            title,
             style: GoogleFonts.cairo(
               fontSize: 17,
               fontWeight: FontWeight.w800,
               color: AppTheme.textPrimary,
-            )),
+            ),
+          ),
         ),
         if (actions != null) ...actions!,
       ],
@@ -284,15 +305,17 @@ class StatChip extends StatelessWidget {
           children: [
             Text(icon, style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 4),
-            Text(value,
+            Text(
+              value,
               style: GoogleFonts.cairo(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
                 color: AppTheme.accent,
-              )),
-            Text(label,
-              style: GoogleFonts.cairo(
-                fontSize: 9, color: AppTheme.textMuted),
+              ),
+            ),
+            Text(
+              label,
+              style: GoogleFonts.cairo(fontSize: 9, color: AppTheme.textMuted),
               textAlign: TextAlign.center,
             ),
           ],

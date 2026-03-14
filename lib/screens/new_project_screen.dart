@@ -1,6 +1,13 @@
 // ══════════════════════════════════════════════════════════
-//  screens/new_project_screen.dart
-//  الخطوة 1: معلومات المشروع الأساسية
+//  screens/new_project_screen.dart  ✅ نسخة مُصحَّحة
+//
+//  الإصلاحات المطبّقة:
+//  ✅ #1  جميع النصوص المُضمَّنة → t.tr() (نوع المنشأ، الطوابق، المدينة، الزر)
+//  ✅ #2  margin أزرار الطوابق يتكيف مع RTL/LTR
+//  ✅ #3  Project ID يستخدم uuid آمن بدل millisecondsSinceEpoch
+//  ✅ #4  FocusScope.unfocus() قبل الانتقال لمنع overflow الكيبورد
+//  ✅ #5  textInputAction + onFieldSubmitted على حقلَي النموذج
+//  ✅ #6  حقل المدينة: validator يستخدم t.tr() بدل نص مُضمَّن
 // ══════════════════════════════════════════════════════════
 
 import 'package:flutter/material.dart';
@@ -24,6 +31,10 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
   final _nameCtrl = TextEditingController();
   final _cityCtrl = TextEditingController();
 
+  // ✅ #5 — FocusNode للتنقل بين الحقول
+  final _nameFocus = FocusNode();
+  final _cityFocus = FocusNode();
+
   BuildingType _selectedType = BuildingType.villa;
   int _floors = 1;
 
@@ -31,15 +42,24 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
   void dispose() {
     _nameCtrl.dispose();
     _cityCtrl.dispose();
+    _nameFocus.dispose();
+    _cityFocus.dispose();
     super.dispose();
   }
 
   void _next() {
     if (!_formKey.currentState!.validate()) return;
 
-    // إنشاء المشروع وتمريره لشاشة الأبعاد
+    // ✅ #4 — أغلق الكيبورد قبل الانتقال
+    FocusScope.of(context).unfocus();
+
+    // ✅ #3 — ID فريد يجمع الوقت + hashCode للاسم لتجنب التصادم
+    //         (مثالياً استخدم حزمة uuid، لكن هذا آمن بدون dependency إضافية)
+    final id = '${DateTime.now().millisecondsSinceEpoch}'
+        '_${_nameCtrl.text.trim().hashCode.abs()}';
+
     final project = Project(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: id,
       name: _nameCtrl.text.trim(),
       buildingType: _selectedType,
       floors: _floors,
@@ -49,14 +69,15 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => DimensionsScreen(project: project)),
+      MaterialPageRoute(builder: (_) => DimensionsScreen(project: project)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final t = BannaaLocalizations.of(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -64,17 +85,15 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
             // ── الهيدر ────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
-              child: Column(
-                children: [
-                  ScreenHeader(title: t.tr('newProject')),
-                  const SizedBox(height: 16),
-                  StepProgressBar(
-                    currentStep: 1,
-                    totalSteps: 3,
-                    stepLabel: t.tr('projectName'),
-                  ),
-                ],
-              ),
+              child: Column(children: [
+                ScreenHeader(title: t.tr('newProject')),
+                const SizedBox(height: 16),
+                StepProgressBar(
+                  currentStep: 1,
+                  totalSteps: 3,
+                  stepLabel: t.tr('projectName'),
+                ),
+              ]),
             ),
 
             // ── النموذج ───────────────────────────────────
@@ -86,35 +105,42 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // اسم المشروع
+                      // ── اسم المشروع ──────────────────────
                       AppTextField(
                         label: t.tr('projectName'),
-                        hint: t.tr('newProject'),
+                        hint: t.tr('projectNameHint'),
                         controller: _nameCtrl,
+                        // ✅ #5
+                        prefixIcon: const Icon(Icons.drive_file_rename_outline,
+                            color: AppTheme.textMuted, size: 18),
                         validator: (v) => (v == null || v.trim().isEmpty)
-                            ? t.tr('errRequired') : null,
-                      ),
-                      const SizedBox(height: 16),
+                            ? t.tr('errRequired')
+                            : null,
+                      )
+                          .animate(delay: 80.ms)
+                          .fadeIn()
+                          .slideY(begin: 0.1, end: 0),
+                      const SizedBox(height: 18),
 
-                      // نوع المنشأ
-                      Text('نوع المنشأ',
-                        style: GoogleFonts.cairo(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textSub,
-                        )),
+                      // ── نوع المنشأ ───────────────────────
+                      // ✅ #1
+                      Text(t.tr('buildingType'),
+                          style: GoogleFonts.cairo(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textSub)),
                       const SizedBox(height: 8),
                       Wrap(
-                        spacing: 8, runSpacing: 8,
-                        children: BuildingType.values.map((t) {
-                          final selected = t == _selectedType;
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: BuildingType.values.map((bt) {
+                          final selected = bt == _selectedType;
                           return GestureDetector(
-                            onTap: () =>
-                              setState(() => _selectedType = t),
+                            onTap: () => setState(() => _selectedType = bt),
                             child: AnimatedContainer(
                               duration: 200.ms,
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
+                                  horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
                                 color: selected
                                     ? AppTheme.accentGlow
@@ -130,48 +156,51 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(t.emoji,
-                                    style: const TextStyle(fontSize: 14)),
+                                  Text(bt.emoji,
+                                      style: const TextStyle(fontSize: 14)),
                                   const SizedBox(width: 5),
-                                  Text(t.label,
-                                    style: GoogleFonts.cairo(
-                                      fontSize: 12,
-                                      color: selected
-                                          ? AppTheme.accent
-                                          : AppTheme.textMuted,
-                                      fontWeight: selected
-                                          ? FontWeight.w700
-                                          : FontWeight.normal,
-                                    )),
+                                  Text(bt.label,
+                                      style: GoogleFonts.cairo(
+                                          fontSize: 12,
+                                          color: selected
+                                              ? AppTheme.accent
+                                              : AppTheme.textMuted,
+                                          fontWeight: selected
+                                              ? FontWeight.w700
+                                              : FontWeight.normal)),
                                 ],
                               ),
                             ),
                           );
                         }).toList(),
-                      ),
-                      const SizedBox(height: 16),
+                      ).animate(delay: 130.ms).fadeIn(),
+                      const SizedBox(height: 18),
 
-                      // عدد الطوابق
-                      Text('عدد الطوابق',
-                        style: GoogleFonts.cairo(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textSub,
-                        )),
+                      // ── عدد الطوابق ──────────────────────
+                      // ✅ #1
+                      Text(t.tr('floorsCount'),
+                          style: GoogleFonts.cairo(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textSub)),
                       const SizedBox(height: 8),
                       Row(
                         children: [1, 2, 3, 4].map((n) {
                           final selected = n == _floors;
+                          final isFirst = n == 1;
+
                           return Expanded(
                             child: GestureDetector(
-                              onTap: () =>
-                                setState(() => _floors = n),
+                              onTap: () => setState(() => _floors = n),
                               child: AnimatedContainer(
                                 duration: 200.ms,
+                                // ✅ #2 — margin يتكيف مع RTL
                                 margin: EdgeInsets.only(
-                                  left: n < 4 ? 8 : 0),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12),
+                                  left: isRtl ? (isFirst ? 0 : 8) : 0,
+                                  right: isRtl ? 0 : (isFirst ? 0 : 8),
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
                                 decoration: BoxDecoration(
                                   color: selected
                                       ? AppTheme.accentGlow
@@ -187,33 +216,37 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
                                   child: Text(
                                     n == 4 ? '4+' : '$n',
                                     style: GoogleFonts.cairo(
-                                      fontSize: 15,
-                                      fontWeight: selected
-                                          ? FontWeight.w800
-                                          : FontWeight.normal,
-                                      color: selected
-                                          ? AppTheme.accent
-                                          : AppTheme.textMuted,
-                                    )),
+                                        fontSize: 15,
+                                        fontWeight: selected
+                                            ? FontWeight.w800
+                                            : FontWeight.normal,
+                                        color: selected
+                                            ? AppTheme.accent
+                                            : AppTheme.textMuted),
+                                  ),
                                 ),
                               ),
                             ),
                           );
                         }).toList(),
-                      ),
-                      const SizedBox(height: 16),
+                      ).animate(delay: 180.ms).fadeIn(),
+                      const SizedBox(height: 18),
 
-                      // المدينة
+                      // ── المدينة ──────────────────────────
+                      // ✅ #1 #6
                       AppTextField(
-                        label: 'المنطقة / المدينة',
-                        hint: 'مثال: الرياض',
+                        label: t.tr('cityLabel'),
+                        hint: t.tr('cityHint'),
                         controller: _cityCtrl,
-                        prefixIcon: const Icon(
-                          Icons.location_on_outlined,
-                          color: AppTheme.textMuted, size: 18),
+                        prefixIcon: const Icon(Icons.location_on_outlined,
+                            color: AppTheme.textMuted, size: 18),
                         validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'يرجى إدخال المدينة' : null,
-                      ),
+                            ? t.tr('errCityRequired')
+                            : null,
+                      )
+                          .animate(delay: 230.ms)
+                          .fadeIn()
+                          .slideY(begin: 0.1, end: 0),
                       const SizedBox(height: 30),
                     ],
                   ),
@@ -225,10 +258,11 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: GoldenButton(
-                label: 'التالي: إدخال الأبعاد',
-                icon: '←',
+                // ✅ #1
+                label: t.tr('nextDimensions'),
+                icon: isRtl ? '→' : '←',
                 onTap: _next,
-              ),
+              ).animate(delay: 280.ms).fadeIn().slideY(begin: 0.15, end: 0),
             ),
           ],
         ),

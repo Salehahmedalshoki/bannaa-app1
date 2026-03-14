@@ -1,10 +1,11 @@
 // ══════════════════════════════════════════════════════════
-//  screens/results_screen.dart — المرحلة الثانية
+//  screens/results_screen.dart — المرحلة الثالثة
 //  ✅ رسم بياني دائري تفاعلي (CustomPainter)
 //  ✅ أرقام تتحرك تصاعدياً عند الظهور
 //  ✅ ملخص تنفيذي في الأعلى
 //  ✅ مقارنة بصرية بين المكوّنات بأشرطة تقدم
 //  ✅ اختيار شريحة من الدائرة يُظهر التفاصيل
+//  ✅ زر "اطلب عرض سعر من مورّد"
 // ══════════════════════════════════════════════════════════
 
 import 'dart:math';
@@ -18,6 +19,7 @@ import '../providers/app_settings_provider.dart';
 import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_localizations.dart';
+import 'quote_request_sheet.dart';
 import '../widgets/common_widgets.dart';
 
 class ResultsScreen extends StatefulWidget {
@@ -637,27 +639,86 @@ class _ResultsScreenState extends State<ResultsScreen>
   //  5. أزرار الإجراءات
   // ════════════════════════════════════════════════════════
   Widget _buildActionButtons(BannaaLocalizations t) {
-    return Row(children: [
-      Expanded(
-          child: GoldenButton(
-              label: t.tr('save'),
-              icon: '💾',
-              outline: true,
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(t.tr('savedSuccess2'),
-                        style: GoogleFonts.cairo(color: Colors.white)),
-                    backgroundColor: AppTheme.success,
-                    behavior: SnackBarBehavior.floating));
-              })),
-      const SizedBox(width: 10),
-      Expanded(
-          flex: 2,
-          child: GoldenButton(
-              label: t.tr('generatePdfBtn'),
-              icon: '📄',
-              isLoading: _isExporting,
-              onTap: _exportPdf)),
+    // جلب materials من السياق الحالي
+    final s = context.watch<AppSettingsProvider>();
+    final mix = s.currentMix;
+    final prices = PriceSheet(
+      cementPerBag: s.prices['cement'] ?? 50,
+      sandPerM3: s.prices['sand'] ?? 150,
+      gravelPerM3: s.prices['gravel'] ?? 180,
+      steelPerKg: s.prices['steel'] ?? 4,
+      waterPerM3: s.prices['water'] ?? 5,
+      currencySymbol: s.currencyInfo.symbol,
+    );
+    final mixParams = MixParameters(
+      cementKgPerM3: mix.cementKgPerM3,
+      sandM3PerM3: mix.sandM3PerM3,
+      gravelM3PerM3: mix.gravelM3PerM3,
+      waterLPerM3: mix.waterLPerM3,
+      steelKgPerM3: mix.steelKgPerM3,
+    );
+    final materials =
+        widget.project.calculateMaterials(mix: mixParams, prices: prices);
+
+    return Column(children: [
+      // زر طلب عرض السعر — بارز في الأعلى
+      GestureDetector(
+        onTap: () => QuoteRequestSheet.show(
+          context,
+          project: widget.project,
+          materials: materials,
+        ),
+        child: Container(
+          width: double.infinity,
+          height: 52,
+          decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                  colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)]),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                    color: const Color(0xFF3B82F6).withOpacity(0.3),
+                    blurRadius: 16,
+                    offset: const Offset(0, 5))
+              ]),
+          child: Center(
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.storefront_outlined,
+                color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Text('اطلب عرض سعر من مورّد',
+                style: GoogleFonts.cairo(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white)),
+          ])),
+        ),
+      ).animate(delay: 100.ms).fadeIn().slideY(begin: 0.2, end: 0),
+      const SizedBox(height: 10),
+
+      // PDF + حفظ
+      Row(children: [
+        Expanded(
+            child: GoldenButton(
+                label: t.tr('save'),
+                icon: '💾',
+                outline: true,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(t.tr('savedSuccess2'),
+                          style: GoogleFonts.cairo(color: Colors.white)),
+                      backgroundColor: AppTheme.success,
+                      behavior: SnackBarBehavior.floating));
+                })),
+        const SizedBox(width: 10),
+        Expanded(
+            flex: 2,
+            child: GoldenButton(
+                label: t.tr('generatePdfBtn'),
+                icon: '📄',
+                isLoading: _isExporting,
+                onTap: _exportPdf)),
+      ]),
     ]);
   }
 

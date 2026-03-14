@@ -1508,6 +1508,86 @@ class BannaaLocalizations {
       'fr': 'Bienvenue 👷',
       'tr': 'Hoş Geldin 👷'
     },
+    // ── تحيات الرئيسية حسب الوقت ─────────────────────────
+    'greetingMorning': {
+      'ar': 'صباح الخير',
+      'en': 'Good Morning',
+      'fr': 'Bonjour',
+      'tr': 'Günaydın'
+    },
+    'greetingAfternoon': {
+      'ar': 'مساء الخير',
+      'en': 'Good Afternoon',
+      'fr': 'Bon après-midi',
+      'tr': 'İyi öğleden sonralar'
+    },
+    'greetingEvening': {
+      'ar': 'مساء النور',
+      'en': 'Good Evening',
+      'fr': 'Bonsoir',
+      'tr': 'İyi akşamlar'
+    },
+    // ── نصوص الرئيسية ────────────────────────────────────
+    'quickToolsTitle': {
+      'ar': 'الأدوات',
+      'en': 'Tools',
+      'fr': 'Outils',
+      'tr': 'Araçlar'
+    },
+    'continueLastProject': {
+      'ar': 'تابع آخر مشروع',
+      'en': 'Continue Last Project',
+      'fr': 'Continuer le dernier projet',
+      'tr': 'Son projeye devam et'
+    },
+    'activeSyncLabel': {
+      'ar': 'مزامنة فعّالة',
+      'en': 'Live Sync',
+      'fr': 'Sync active',
+      'tr': 'Aktif senkron'
+    },
+    'quoteRequestsTitle': {
+      'ar': 'طلبات عروض الأسعار',
+      'en': 'Quote Requests',
+      'fr': 'Demandes de devis',
+      'tr': 'Teklif Talepleri'
+    },
+    'noQuotesYet': {
+      'ar': 'لا توجد طلبات بعد',
+      'en': 'No requests yet',
+      'fr': 'Aucune demande',
+      'tr': 'Henüz talep yok'
+    },
+    'quotesSent': {
+      'ar': 'طلب مرسل',
+      'en': 'request sent',
+      'fr': 'demande envoyée',
+      'tr': 'talep gönderildi'
+    },
+    'newReplies': {
+      'ar': 'رد جديد',
+      'en': 'new reply',
+      'fr': 'nouvelle réponse',
+      'tr': 'yeni yanıt'
+    },
+    'componentCount': {
+      'ar': 'مكوّن',
+      'en': 'component',
+      'fr': 'composant',
+      'tr': 'bileşen'
+    },
+    'deleteProjectConfirmMsg': {
+      'ar': 'سيُحذف هذا المشروع نهائياً ولا يمكن التراجع.',
+      'en': 'This project will be permanently deleted.',
+      'fr': 'Ce projet sera supprimé définitivement.',
+      'tr': 'Bu proje kalıcı olarak silinecek.'
+    },
+    'inProgress': {
+      'ar': 'قيد التنفيذ',
+      'en': 'In Progress',
+      'fr': 'En cours',
+      'tr': 'Devam ediyor'
+    },
     'lastProjects': {
       'ar': 'آخر المشاريع',
       'en': 'Recent Projects',
@@ -1852,10 +1932,310 @@ class BannaaLocalizations {
     },
     'close': {'ar': 'إغلاق', 'en': 'Close', 'fr': 'Fermer', 'tr': 'Kapat'},
 
-// ─────────────────────────────────────────────────────────
-// ملاحظة: تأكد من إضافة فاصلة (,) بعد آخر مفتاح موجود
-//         قبل إضافة هذه المفاتيح الجديدة
-// ─────────────────────────────────────────────────────────
+    // ── شريط التنقل السفلي ────────────────────────────────
+    'navHome': {
+      'ar': 'الرئيسية',
+      'en': 'Home',
+      'fr': 'Accueil',
+      'tr': 'Ana Sayfa'
+    },
+    'navProjects': {
+      'ar': 'مشاريعي',
+      'en': 'Projects',
+      'fr': 'Projets',
+      'tr': 'Projeler'
+    },
+    'navCalculator': {
+      'ar': 'الحاسبة',
+      'en': 'Calculator',
+      'fr': 'Calculatrice',
+      'tr': 'Hesaplama'
+    },
+    'navAerial': {
+      'ar': 'إسقاط جوي',
+      'en': 'Aerial',
+      'fr': 'Aérien',
+      'tr': 'Havadan'
+    },
+    'navProfile': {
+      'ar': 'حسابي',
+      'en': 'Profile',
+      'fr': 'Profil',
+      'tr': 'Hesabım'
+    },
+
+    // ── حذف بالسحب — تأكيد ───────────────────────────────
+    'swipeDeleteTitle': {
+      'ar': 'حذف المشروع',
+      'en': 'Delete Project',
+      'fr': 'Supprimer le projet',
+      'tr': 'Projeyi Sil'
+    },
+    'swipeDeleteBody': {
+      'ar': 'سيتم حذف هذا المشروع بشكل نهائي ولا يمكن التراجع.',
+      'en': 'This project will be permanently deleted and cannot be undone.',
+      'fr': 'Ce projet sera définitivement supprimé et ne peut être annulé.',
+      'tr': 'Bu proje kalıcı olarak silinecek ve geri alınamaz.'
+    },
+    'swipeDeleteConfirm': {
+      'ar': 'نعم، احذف',
+      'en': 'Yes, Delete',
+      'fr': 'Oui, supprimer',
+      'tr': 'Evet, Sil'
+    },
+    'calcHistoryClearedMsg': {
+      'ar': 'تم مسح سجل الحسابات',
+      'en': 'Calculation history cleared',
+      'fr': 'Historique effacé',
+      'tr': 'Hesap geçmişi temizlendi'
+    },
+
+    // ── مفاتيح شاشة التسجيل المُضافة ────────────────────
+    'accountTypeLabel': {
+      'ar': 'نوع الحساب',
+      'en': 'Account type',
+      'fr': 'Type de compte',
+      'tr': 'Hesap türü'
+    },
+    'badgeUser': {
+      'ar': 'مستخدم عادي',
+      'en': 'Regular user',
+      'fr': 'Utilisateur',
+      'tr': 'Normal kullanıcı'
+    },
+    'badgeSupplier': {
+      'ar': 'مورّد',
+      'en': 'Supplier',
+      'fr': 'Fournisseur',
+      'tr': 'Tedarikçi'
+    },
+    'userCardSub': {
+      'ar': 'احسب كميات\nمواد البناء',
+      'en': 'Calculate\nconstruction materials',
+      'fr': 'Calculez les\nmatériaux de construction',
+      'tr': 'İnşaat malzemelerini\nhesapla'
+    },
+    'supplierCardSub': {
+      'ar': 'انشر عروض\nالمواد والخدمات',
+      'en': 'Post material\n& service offers',
+      'fr': 'Publiez des offres\nde matériaux',
+      'tr': 'Malzeme ve hizmet\nteklifleri yayınla'
+    },
+    'supplierNameLabel': {
+      'ar': 'اسم المتجر / الشركة',
+      'en': 'Store / Company name',
+      'fr': 'Nom du magasin / entreprise',
+      'tr': 'Mağaza / Şirket adı'
+    },
+    'supplierNameHint': {
+      'ar': 'مثال: شركة الخليج للمواد',
+      'en': 'e.g. Gulf Materials Co.',
+      'fr': 'ex: Matériaux Gulf',
+      'tr': 'örn: Gulf Malzemeleri'
+    },
+    'registerSupplierBtn': {
+      'ar': 'إنشاء حساب المورّد',
+      'en': 'Create supplier account',
+      'fr': 'Créer compte fournisseur',
+      'tr': 'Tedarikçi hesabı oluştur'
+    },
+    'successSupplierTitle': {
+      'ar': 'تم إنشاء حساب المورّد!',
+      'en': 'Supplier account created!',
+      'fr': 'Compte fournisseur créé !',
+      'tr': 'Tedarikçi hesabı oluşturuldu!'
+    },
+    'successUserTitle': {
+      'ar': 'تم إنشاء الحساب!',
+      'en': 'Account created!',
+      'fr': 'Compte créé !',
+      'tr': 'Hesap oluşturuldu!'
+    },
+    'successSupplierBody': {
+      'ar':
+          'مرحباً بك في منصة بنّاء كمورّد معتمد.\nيمكنك الآن تلقي الطلبات وإدارة عروضك.',
+      'en':
+          'Welcome to Bannaa as a certified supplier.\nYou can now receive orders and manage your offers.',
+      'fr':
+          'Bienvenue sur Bannaa en tant que fournisseur.\nVous pouvez recevoir des commandes.',
+      'tr':
+          'Bannaa\'ya onaylı tedarikçi olarak hoş geldiniz.\nArtık sipariş alabilirsiniz.'
+    },
+    'successUserBody': {
+      'ar': 'مرحباً {name}!\nحسابك جاهز، ابدأ باستخدام التطبيق الآن.',
+      'en': 'Welcome {name}!\nYour account is ready, start using the app now.',
+      'fr': 'Bienvenue {name} !\nVotre compte est prêt.',
+      'tr':
+          'Hoş geldiniz {name}!\nHesabınız hazır, uygulamayı kullanmaya başlayın.'
+    },
+    'goDashboardBtn': {
+      'ar': 'الذهاب للوحة التحكم',
+      'en': 'Go to dashboard',
+      'fr': 'Aller au tableau de bord',
+      'tr': 'Panele git'
+    },
+    'startNowBtn': {
+      'ar': 'ابدأ الآن',
+      'en': 'Start now',
+      'fr': 'Commencer',
+      'tr': 'Şimdi başla'
+    },
+
+    // ── مفاتيح بطاقات الأدوات السريعة ───────────────────
+    'toolCalcTitle': {
+      'ar': 'الحاسبة',
+      'en': 'Calculator',
+      'fr': 'Calculatrice',
+      'tr': 'Hesaplama'
+    },
+    'toolCalcSub': {
+      'ar': 'احسب الكميات\nفوراً',
+      'en': 'Calculate quantities\ninstantly',
+      'fr': 'Calculez les quantités\ninstantanément',
+      'tr': 'Miktarları anında\nhesapla'
+    },
+    'toolMapTitle': {
+      'ar': 'إسقاط جوي',
+      'en': 'Aerial projection',
+      'fr': 'Projection aérienne',
+      'tr': 'Hava projeksiyonu'
+    },
+    'toolMapSub': {
+      'ar': 'ارسم أرضك\nعلى الخريطة',
+      'en': 'Draw your plot\non the map',
+      'fr': 'Dessinez votre terrain\nsur la carte',
+      'tr': 'Arazini harita\nüzerinde çiz'
+    },
+    'projectNameHint': {
+      'ar': 'مثال: فيلا العائلة',
+      'en': 'e.g. Family Villa',
+      'fr': 'ex : Villa de famille',
+      'tr': 'örn: Aile Villası'
+    },
+    'floorsCount': {
+      'ar': 'عدد الطوابق',
+      'en': 'Number of floors',
+      'fr': 'Nombre d\u0027étages',
+      'tr': 'Kat sayısı'
+    },
+    'cityLabel': {
+      'ar': 'المنطقة / المدينة',
+      'en': 'Region / City',
+      'fr': 'Région / Ville',
+      'tr': 'Bölge / Şehir'
+    },
+    'cityHint': {
+      'ar': 'مثال: الرياض',
+      'en': 'e.g. Riyadh',
+      'fr': 'ex : Riyad',
+      'tr': 'örn: Riyad'
+    },
+    'errCityRequired': {
+      'ar': 'يرجى إدخال المدينة',
+      'en': 'Please enter the city',
+      'fr': 'Veuillez entrer la ville',
+      'tr': 'Lütfen şehri girin'
+    },
+    'nextDimensions': {
+      'ar': 'التالي: إدخال الأبعاد',
+      'en': 'Next: Enter dimensions',
+      'fr': 'Suivant : Entrer les dimensions',
+      'tr': 'Sonraki: Ölçüleri girin'
+    },
+    // ── مفاتيح جديدة مضافة من المراجعة ──────────────────
+    // project_detail_screen
+    'projectDetails': {
+      'ar': 'تفاصيل المشروع',
+      'en': 'Project Details',
+      'fr': 'Détails du Projet',
+      'tr': 'Proje Detayları'
+    },
+    'overviewTab': {
+      'ar': 'نظرة عامة',
+      'en': 'Overview',
+      'fr': 'Aperçu',
+      'tr': 'Genel Bakış'
+    },
+    'componentsTab': {
+      'ar': 'المكوّنات',
+      'en': 'Components',
+      'fr': 'Composants',
+      'tr': 'Bileşenler'
+    },
+    'costsTab': {
+      'ar': 'التكاليف',
+      'en': 'Costs',
+      'fr': 'Coûts',
+      'tr': 'Maliyetler'
+    },
+    'editComponents': {
+      'ar': 'تعديل المكوّنات',
+      'en': 'Edit components',
+      'fr': 'Modifier les composants',
+      'tr': 'Bileşenleri düzenle'
+    },
+    'viewReport': {
+      'ar': 'عرض التقرير',
+      'en': 'View report',
+      'fr': 'Voir le rapport',
+      'tr': 'Raporu görüntüle'
+    },
+    'componentsCount': {
+      'ar': 'عدد المكوّنات',
+      'en': 'Components',
+      'fr': 'Composants',
+      'tr': 'Bileşen sayısı'
+    },
+    'componentSuffix': {
+      'ar': 'مكوّن',
+      'en': 'comp.',
+      'fr': 'comp.',
+      'tr': 'bileşen'
+    },
+    'floorSuffix': {'ar': 'طابق', 'en': 'floor', 'fr': 'étage', 'tr': 'kat'},
+    'materialSummary': {
+      'ar': 'ملخص المواد',
+      'en': 'Materials summary',
+      'fr': 'Résumé des matériaux',
+      'tr': 'Malzeme özeti'
+    },
+    'projectInfo': {
+      'ar': 'معلومات المشروع',
+      'en': 'Project info',
+      'fr': 'Infos du projet',
+      'tr': 'Proje bilgileri'
+    },
+    'typeLabel': {'ar': 'النوع', 'en': 'Type', 'fr': 'Type', 'tr': 'Tür'},
+    'cityInfo': {'ar': 'المدينة', 'en': 'City', 'fr': 'Ville', 'tr': 'Şehir'},
+    'createdDate': {
+      'ar': 'تاريخ الإنشاء',
+      'en': 'Created',
+      'fr': 'Créé le',
+      'tr': 'Oluşturulma'
+    },
+    'projectIdLabel': {'ar': 'المعرّف', 'en': 'ID', 'fr': 'ID', 'tr': 'Kimlik'},
+    'totalCostFull': {
+      'ar': 'التكلفة التقديرية الكاملة',
+      'en': 'Full estimated cost',
+      'fr': 'Coût total estimé',
+      'tr': 'Toplam tahmini maliyet'
+    },
+    'addComponents': {
+      'ar': 'إضافة مكوّنات',
+      'en': 'Add components',
+      'fr': 'Ajouter des composants',
+      'tr': 'Bileşen ekle'
+    },
+    'pricesNote': {
+      'ar':
+          'الأسعار تقديرية وتختلف حسب المورد والمنطقة. يُنصح بمراجعة مهندس مختص.',
+      'en':
+          'Prices are estimates and vary by supplier and region. Consult a qualified engineer.',
+      'fr':
+          'Les prix sont estimatifs et varient selon le fournisseur. Consultez un ingénieur.',
+      'tr':
+          'Fiyatlar tahminidir ve tedarikçiye göre değişir. Uzman bir mühendise danışın.'
+    },
   };
 
   // ── دالة الترجمة ─────────────────────────────────────────
