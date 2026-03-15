@@ -75,7 +75,7 @@ class _MigrateAndRouteState extends State<_MigrateAndRoute> {
     // ✅ #2 — ترحيل المشاريع المحلية بـ try/catch منفصل
     // الفشل هنا لا يوقف التوجيه — البيانات المحلية تبقى آمنة
     try {
-      final localProjects = StorageService.getAllProjects();
+      final localProjects = StorageService.getAllProjectsLocal();
       if (localProjects.isNotEmpty) {
         await FirestoreService.migrateLocalProjects(localProjects);
       }

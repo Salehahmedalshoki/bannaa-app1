@@ -192,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(
-                    color: AppTheme.accent.withOpacity(0.35),
+                    color: AppTheme.accent.withValues(alpha: 0.35),
                     blurRadius: 20,
                     offset: const Offset(0, 6))
               ]),
@@ -249,9 +249,9 @@ class _LoginScreenState extends State<LoginScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-          color: AppTheme.danger.withOpacity(0.1),
+          color: AppTheme.danger.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.danger.withOpacity(0.4))),
+          border: Border.all(color: AppTheme.danger.withValues(alpha: 0.4))),
       child: Row(children: [
         const Icon(Icons.error_outline, color: AppTheme.danger, size: 18),
         const SizedBox(width: 10),
@@ -393,7 +393,7 @@ class _LoginScreenState extends State<LoginScreen> {
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
                 color: _anyLoading
-                    ? AppTheme.border.withOpacity(0.4)
+                    ? AppTheme.border.withValues(alpha: 0.4)
                     : AppTheme.border)),
         child: Center(
           child: _isGoogleLoading
@@ -493,9 +493,9 @@ class _LoginBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.25))),
+          border: Border.all(color: color.withValues(alpha: 0.25))),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(icon, color: color, size: 13),
         const SizedBox(width: 5),

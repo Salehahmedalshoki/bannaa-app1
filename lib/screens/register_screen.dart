@@ -138,7 +138,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.75), // ✅ #6
+      barrierColor: Colors.black.withValues(alpha: 0.75), // ✅ #6
       builder: (dialogCtx) => Dialog(
         backgroundColor: AppTheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -285,10 +285,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       margin: const EdgeInsets.only(bottom: 16),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                          color: AppTheme.danger.withOpacity(0.1),
+                          color: AppTheme.danger.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                              color: AppTheme.danger.withOpacity(0.4))),
+                              color: AppTheme.danger.withValues(alpha: 0.4))),
                       child: Row(children: [
                         const Icon(Icons.error_outline,
                             color: AppTheme.danger, size: 16),
@@ -577,7 +577,9 @@ class _UserTypeCard extends StatelessWidget {
         curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? accentColor.withOpacity(0.10) : AppTheme.surface,
+          color: isSelected
+              ? accentColor.withValues(alpha: 0.10)
+              : AppTheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? accentColor : AppTheme.border,
@@ -586,7 +588,7 @@ class _UserTypeCard extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                      color: accentColor.withOpacity(0.18),
+                      color: accentColor.withValues(alpha: 0.18),
                       blurRadius: 12,
                       offset: const Offset(0, 4))
                 ]

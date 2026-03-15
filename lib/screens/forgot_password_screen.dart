@@ -101,7 +101,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               decoration: BoxDecoration(
                   color: AppTheme.accentGlow,
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppTheme.accent.withOpacity(0.3))),
+                  border: Border.all(
+                      color: AppTheme.accent.withValues(alpha: 0.3))),
               child: const Center(
                   child: Text('🔑', style: TextStyle(fontSize: 38))),
             ),
@@ -136,9 +137,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                  color: AppTheme.danger.withOpacity(0.1),
+                  color: AppTheme.danger.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.danger.withOpacity(0.4))),
+                  border: Border.all(
+                      color: AppTheme.danger.withValues(alpha: 0.4))),
               child: Row(children: [
                 const Icon(Icons.error_outline,
                     color: AppTheme.danger, size: 16),
@@ -208,10 +210,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           width: 90,
           height: 90,
           decoration: BoxDecoration(
-              color: AppTheme.success.withOpacity(0.1),
+              color: AppTheme.success.withValues(alpha: 0.1),
               shape: BoxShape.circle,
               border: Border.all(
-                  color: AppTheme.success.withOpacity(0.3), width: 2)),
+                  color: AppTheme.success.withValues(alpha: 0.3), width: 2)),
           child:
               const Center(child: Text('✉️', style: TextStyle(fontSize: 42))),
         ),
@@ -248,7 +250,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         decoration: BoxDecoration(
             color: AppTheme.accentGlow,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppTheme.accent.withOpacity(0.3))),
+            border: Border.all(color: AppTheme.accent.withValues(alpha: 0.3))),
         child: Text(email,
             style: GoogleFonts.cairo(
                 fontSize: 13,

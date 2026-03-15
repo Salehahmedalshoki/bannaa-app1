@@ -1,9 +1,17 @@
 // ══════════════════════════════════════════════════════════
-//  screens/supplier_dashboard.dart — المرحلة الثالثة
-//  🏪 لوحة تحكم المورّد — متصلة بـ Firestore فعلياً
-//  ✅ الطلبات الواردة بـ Stream حقيقي
-//  ✅ إمكانية الرد على كل طلب
-//  ✅ تغيير حالة الطلب (مشاهَد ← مردود عليه)
+//  screens/supplier_dashboard.dart  ✅ نسخة مُصحَّحة
+//
+//  الإصلاحات المطبّقة:
+//  ✅ #1  Stream واحد في الجذر — لا تكرار لـ incomingQuotesStream()
+//  ✅ #2  withOpacity المُهمَلة → withValues(alpha:) في كل المواضع
+//  ✅ #3  try/catch + mounted check في _send() — لا تجميد عند فشل Firestore
+//  ✅ #4  try/catch حول markQuoteAsViewed لمنع crash صامت
+//  ✅ #5  arrow_forward_ios → Transform.flip يتكيف مع RTL
+//  ✅ #6  زر إضافة العرض له placeholder SnackBar بدل onTap فارغ
+//  ✅ #7  _EmptyOrders و _EmptyOffers → const constructors
+//  ✅ #8  boxShadow يستخدم withValues بدل withOpacity
+//  ✅ #9  _formatDate تدعم الأسابيع والأشهر
+//  ✅ #10 _isSending يُعاد ضبطه عند فشل الإرسال
 // ══════════════════════════════════════════════════════════
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,16 +35,17 @@ class _SupplierDashboardState extends State<SupplierDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      body: StreamBuilder<List<QuoteRequest>>(
-        stream: FirestoreService.incomingQuotesStream(),
-        builder: (context, snapshot) {
-          final requests = snapshot.data ?? [];
-          final pending =
-              requests.where((r) => r.status == QuoteStatus.pending).length;
+    // ✅ #1 — Stream واحد فقط في الجذر، يُمرَّر للأبناء
+    return StreamBuilder<List<QuoteRequest>>(
+      stream: FirestoreService.incomingQuotesStream(),
+      builder: (context, snapshot) {
+        final requests = snapshot.data ?? [];
+        final pending =
+            requests.where((r) => r.status == QuoteStatus.pending).length;
 
-          return IndexedStack(
+        return Scaffold(
+          backgroundColor: AppTheme.background,
+          body: IndexedStack(
             index: _currentTab,
             children: [
               _SupplierHomeTab(requests: requests),
@@ -44,118 +53,108 @@ class _SupplierDashboardState extends State<SupplierDashboard> {
               const _SupplierOffersTab(),
               const _SupplierProfileTab(),
             ],
-          );
-        },
-      ),
-      bottomNavigationBar: _buildBottomNav(),
+          ),
+          bottomNavigationBar: _buildBottomNav(pending),
+        );
+      },
     );
   }
 
-  Widget _buildBottomNav() {
-    return StreamBuilder<List<QuoteRequest>>(
-      stream: FirestoreService.incomingQuotesStream(),
-      builder: (context, snapshot) {
-        final pending = (snapshot.data ?? [])
-            .where((r) => r.status == QuoteStatus.pending)
-            .length;
+  // ✅ #1 — يستقبل pending جاهزاً من StreamBuilder الأب، لا Stream جديد
+  Widget _buildBottomNav(int pending) {
+    final tabs = [
+      _NavItem(
+          icon: Icons.dashboard_outlined,
+          activeIcon: Icons.dashboard_rounded,
+          label: 'الرئيسية'),
+      _NavItem(
+          icon: Icons.receipt_long_outlined,
+          activeIcon: Icons.receipt_long_rounded,
+          label: 'الطلبات',
+          badge: pending),
+      _NavItem(
+          icon: Icons.inventory_2_outlined,
+          activeIcon: Icons.inventory_2_rounded,
+          label: 'عروضي'),
+      _NavItem(
+          icon: Icons.storefront_outlined,
+          activeIcon: Icons.storefront_rounded,
+          label: 'متجري'),
+    ];
 
-        final tabs = [
-          _NavItem(
-              icon: Icons.dashboard_outlined,
-              activeIcon: Icons.dashboard_rounded,
-              label: 'الرئيسية'),
-          _NavItem(
-              icon: Icons.receipt_long_outlined,
-              activeIcon: Icons.receipt_long_rounded,
-              label: 'الطلبات',
-              badge: pending),
-          _NavItem(
-              icon: Icons.inventory_2_outlined,
-              activeIcon: Icons.inventory_2_rounded,
-              label: 'عروضي'),
-          _NavItem(
-              icon: Icons.storefront_outlined,
-              activeIcon: Icons.storefront_rounded,
-              label: 'متجري'),
-        ];
-
-        return Container(
-          decoration: const BoxDecoration(
-              color: AppTheme.surface,
-              border: Border(top: BorderSide(color: AppTheme.border))),
-          child: SafeArea(
-            child: SizedBox(
-              height: 62,
-              child: Row(
-                children: List.generate(tabs.length, (i) {
-                  final isActive = _currentTab == i;
-                  final tab = tabs[i];
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _currentTab = i),
-                      behavior: HitTestBehavior.opaque,
-                      child: Stack(alignment: Alignment.topCenter, children: [
-                        Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              AnimatedContainer(
-                                duration: 220.ms,
-                                width: isActive ? 48 : 38,
-                                height: isActive ? 30 : 26,
-                                decoration: BoxDecoration(
+    return Container(
+      decoration: const BoxDecoration(
+          color: AppTheme.surface,
+          border: Border(top: BorderSide(color: AppTheme.border))),
+      child: SafeArea(
+        child: SizedBox(
+          height: 62,
+          child: Row(
+            children: List.generate(tabs.length, (i) {
+              final isActive = _currentTab == i;
+              final tab = tabs[i];
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _currentTab = i),
+                  behavior: HitTestBehavior.opaque,
+                  child: Stack(alignment: Alignment.topCenter, children: [
+                    Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AnimatedContainer(
+                            duration: 220.ms,
+                            width: isActive ? 48 : 38,
+                            height: isActive ? 30 : 26,
+                            decoration: BoxDecoration(
+                                // ✅ #2
+                                color: isActive
+                                    ? const Color(0xFF3B82F6)
+                                        .withValues(alpha: 0.15)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Center(
+                                child: Icon(
+                                    isActive ? tab.activeIcon : tab.icon,
+                                    size: isActive ? 20 : 18,
                                     color: isActive
                                         ? const Color(0xFF3B82F6)
-                                            .withOpacity(0.15)
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Center(
-                                    child: Icon(
-                                        isActive ? tab.activeIcon : tab.icon,
-                                        size: isActive ? 20 : 18,
-                                        color: isActive
-                                            ? const Color(0xFF3B82F6)
-                                            : AppTheme.textMuted)),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(tab.label,
-                                  style: GoogleFonts.cairo(
-                                      fontSize: isActive ? 10 : 9,
-                                      fontWeight: isActive
-                                          ? FontWeight.w700
-                                          : FontWeight.normal,
-                                      color: isActive
-                                          ? const Color(0xFF3B82F6)
-                                          : AppTheme.textMuted)),
-                            ]),
-                        // badge عدد الطلبات
-                        if (tab.badge > 0)
-                          Positioned(
-                            top: 6,
-                            right: 14,
-                            child: Container(
-                              width: 16,
-                              height: 16,
-                              decoration: const BoxDecoration(
-                                  color: AppTheme.danger,
-                                  shape: BoxShape.circle),
-                              child: Center(
-                                  child: Text(
-                                      '${tab.badge > 9 ? '9+' : tab.badge}',
-                                      style: GoogleFonts.cairo(
-                                          fontSize: 9,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w800))),
-                            ),
+                                        : AppTheme.textMuted)),
                           ),
-                      ]),
-                    ),
-                  );
-                }),
-              ),
-            ),
+                          const SizedBox(height: 3),
+                          Text(tab.label,
+                              style: GoogleFonts.cairo(
+                                  fontSize: isActive ? 10 : 9,
+                                  fontWeight: isActive
+                                      ? FontWeight.w700
+                                      : FontWeight.normal,
+                                  color: isActive
+                                      ? const Color(0xFF3B82F6)
+                                      : AppTheme.textMuted)),
+                        ]),
+                    if (tab.badge > 0)
+                      Positioned(
+                        top: 6,
+                        right: 14,
+                        child: Container(
+                          width: 16,
+                          height: 16,
+                          decoration: const BoxDecoration(
+                              color: AppTheme.danger, shape: BoxShape.circle),
+                          child: Center(
+                              child: Text(tab.badge > 9 ? '9+' : '${tab.badge}',
+                                  style: GoogleFonts.cairo(
+                                      fontSize: 9,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800))),
+                        ),
+                      ),
+                  ]),
+                ),
+              );
+            }),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
@@ -226,9 +225,11 @@ class _SupplierHomeTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                  color: AppTheme.success.withOpacity(0.1),
+                  // ✅ #2
+                  color: AppTheme.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppTheme.success.withOpacity(0.3))),
+                  border: Border.all(
+                      color: AppTheme.success.withValues(alpha: 0.3))),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Container(
                     width: 7,
@@ -247,7 +248,6 @@ class _SupplierHomeTab extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // إحصائيات فعلية
           Text('إحصائياتك',
               style: GoogleFonts.cairo(
                   fontSize: 13,
@@ -286,7 +286,6 @@ class _SupplierHomeTab extends StatelessWidget {
             ],
           ).animate(delay: 200.ms).fadeIn(),
 
-          // آخر طلب
           if (requests.isNotEmpty) ...[
             const SizedBox(height: 22),
             Text('أحدث طلب',
@@ -306,7 +305,7 @@ class _SupplierHomeTab extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════════════════
-//  تاب الطلبات — الطلبات الواردة كاملة
+//  تاب الطلبات
 // ══════════════════════════════════════════════════════════
 class _SupplierOrdersTab extends StatelessWidget {
   final List<QuoteRequest> requests;
@@ -330,7 +329,8 @@ class _SupplierOrdersTab extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                      color: const Color(0xFF3B82F6).withOpacity(0.12),
+                      // ✅ #2
+                      color: const Color(0xFF3B82F6).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20)),
                   child: Text('${requests.length} طلب',
                       style: GoogleFonts.cairo(
@@ -342,7 +342,8 @@ class _SupplierOrdersTab extends StatelessWidget {
         const SizedBox(height: 4),
         Expanded(
           child: requests.isEmpty
-              ? _EmptyOrders()
+              // ✅ #7
+              ? const _EmptyOrders()
               : ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                   itemCount: requests.length,
@@ -369,34 +370,44 @@ class _IncomingQuoteCard extends StatelessWidget {
     final statusColor = _statusColor(request.status);
 
     return GestureDetector(
-      onTap: () {
-        // وضع علامة "مشاهَد"
+      onTap: () async {
+        // ✅ #4 — try/catch حول markQuoteAsViewed
         if (isNew) {
-          FirestoreService.markQuoteAsViewed(request.id);
+          try {
+            await FirestoreService.markQuoteAsViewed(request.id);
+          } catch (_) {
+            // فشل صامت — لا نوقف تجربة المستخدم
+          }
         }
-        _showReplySheet(context, request);
+        if (context.mounted) {
+          _showReplySheet(context, request);
+        }
       },
       child: AnimatedContainer(
         duration: 300.ms,
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-            color: isNew ? AppTheme.danger.withOpacity(0.04) : AppTheme.surface,
+            // ✅ #2
+            color: isNew
+                ? AppTheme.danger.withValues(alpha: 0.04)
+                : AppTheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-                color:
-                    isNew ? AppTheme.danger.withOpacity(0.3) : AppTheme.border,
+                color: isNew
+                    ? AppTheme.danger.withValues(alpha: 0.3)
+                    : AppTheme.border,
                 width: isNew ? 1.5 : 1)),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              // أيقونة المستخدم
               Container(
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                      color: const Color(0xFF3B82F6).withOpacity(0.1),
+                      // ✅ #2
+                      color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12)),
                   child: Center(
                       child: Text(
@@ -443,7 +454,8 @@ class _IncomingQuoteCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.1),
+                        // ✅ #2
+                        color: statusColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6)),
                     child: Text(request.status.label,
                         style: GoogleFonts.cairo(
@@ -523,6 +535,35 @@ class _IncomingQuoteCard extends StatelessWidget {
                   ])),
                 ),
               ),
+
+            // الرد المُرسَل (إن وُجد)
+            if (request.supplierResponse != null &&
+                request.supplierResponse!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                      // ✅ #2
+                      color: AppTheme.success.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: AppTheme.success.withValues(alpha: 0.2))),
+                  child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.check_circle_outline,
+                            color: AppTheme.success, size: 14),
+                        const SizedBox(width: 6),
+                        Expanded(
+                            child: Text(request.supplierResponse!,
+                                style: GoogleFonts.cairo(
+                                    fontSize: 10,
+                                    color: AppTheme.textSub,
+                                    height: 1.5))),
+                      ]),
+                ),
+              ),
           ]),
         ),
       ),
@@ -548,11 +589,15 @@ class _IncomingQuoteCard extends StatelessWidget {
     }
   }
 
+  // ✅ #9 — تدعم الأسابيع والأشهر
   String _formatDate(DateTime dt) {
     final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 1) return 'الآن';
     if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes}د';
     if (diff.inHours < 24) return 'منذ ${diff.inHours}س';
-    return 'منذ ${diff.inDays}ي';
+    if (diff.inDays < 7) return 'منذ ${diff.inDays}ي';
+    if (diff.inDays < 30) return 'منذ ${(diff.inDays / 7).floor()}أ';
+    return 'منذ ${(diff.inDays / 30).floor()}ش';
   }
 
   void _showReplySheet(BuildContext context, QuoteRequest request) {
@@ -589,22 +634,33 @@ class _ReplySheetState extends State<_ReplySheet> {
     super.dispose();
   }
 
+  // ✅ #3 — try/catch + mounted + ✅ #10 — إعادة ضبط الزر عند الفشل
   Future<void> _send() async {
     if (_replyCtrl.text.trim().isEmpty) return;
     setState(() => _isSending = true);
 
-    await FirestoreService.respondToQuote(
-      quoteId: widget.request.id,
-      userId: widget.request.userId,
-      response: _replyCtrl.text.trim(),
-    );
+    try {
+      await FirestoreService.respondToQuote(
+        quoteId: widget.request.id,
+        userId: widget.request.userId,
+        response: _replyCtrl.text.trim(),
+      );
 
-    if (mounted) {
+      if (!mounted) return;
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('تم إرسال ردّك بنجاح ✓',
               style: GoogleFonts.cairo(color: Colors.white)),
           backgroundColor: AppTheme.success,
+          behavior: SnackBarBehavior.floating));
+    } catch (e) {
+      // ✅ #10 — إعادة ضبط الزر + رسالة خطأ
+      if (!mounted) return;
+      setState(() => _isSending = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('فشل الإرسال، حاول مجدداً',
+              style: GoogleFonts.cairo(color: Colors.white)),
+          backgroundColor: AppTheme.danger,
           behavior: SnackBarBehavior.floating));
     }
   }
@@ -619,7 +675,6 @@ class _ReplySheetState extends State<_ReplySheet> {
             color: AppTheme.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          // handle
           Container(
               margin: const EdgeInsets.only(top: 12),
               width: 40,
@@ -628,7 +683,6 @@ class _ReplySheetState extends State<_ReplySheet> {
                   color: AppTheme.border,
                   borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 16),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child:
@@ -680,12 +734,13 @@ class _ReplySheetState extends State<_ReplySheet> {
                               colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)]),
                       color: _isSending ? AppTheme.border : null,
                       borderRadius: BorderRadius.circular(14),
+                      // ✅ #8
                       boxShadow: _isSending
                           ? null
                           : [
                               BoxShadow(
-                                  color:
-                                      const Color(0xFF3B82F6).withOpacity(0.3),
+                                  color: const Color(0xFF3B82F6)
+                                      .withValues(alpha: 0.3),
                                   blurRadius: 16,
                                   offset: const Offset(0, 5))
                             ]),
@@ -733,20 +788,25 @@ class _QuotePreviewCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-          color: isNew ? AppTheme.danger.withOpacity(0.05) : AppTheme.surface,
+          // ✅ #2
+          color: isNew
+              ? AppTheme.danger.withValues(alpha: 0.05)
+              : AppTheme.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-              color:
-                  isNew ? AppTheme.danger.withOpacity(0.25) : AppTheme.border)),
+              color: isNew
+                  ? AppTheme.danger.withValues(alpha: 0.25)
+                  : AppTheme.border)),
       child: Row(children: [
         Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-                color: const Color(0xFF3B82F6).withOpacity(0.1),
+                // ✅ #2
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(11)),
-            child: Center(
-                child: const Icon(Icons.receipt_long_outlined,
+            child: const Center(
+                child: Icon(Icons.receipt_long_outlined,
                     color: Color(0xFF3B82F6), size: 20))),
         const SizedBox(width: 12),
         Expanded(
@@ -778,7 +838,7 @@ class _QuotePreviewCard extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════════════════
-//  تاب العروض (placeholder)
+//  تاب العروض
 // ══════════════════════════════════════════════════════════
 class _SupplierOffersTab extends StatelessWidget {
   const _SupplierOffersTab();
@@ -796,8 +856,16 @@ class _SupplierOffersTab extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                     color: AppTheme.textPrimary)),
             const Spacer(),
+            // ✅ #6 — SnackBar بدل onTap فارغ
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('قريباً: إضافة عروض المواد',
+                        style: GoogleFonts.cairo(color: Colors.white)),
+                    backgroundColor: AppTheme.info,
+                    behavior: SnackBarBehavior.floating,
+                    duration: const Duration(seconds: 2)));
+              },
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -818,7 +886,8 @@ class _SupplierOffersTab extends StatelessWidget {
             ),
           ]),
         ),
-        Expanded(child: _EmptyOffers()),
+        // ✅ #7
+        const Expanded(child: _EmptyOffers()),
       ]),
     );
   }
@@ -835,6 +904,8 @@ class _SupplierProfileTab extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     final name = user?.displayName ?? 'المورّد';
     final email = user?.email ?? '';
+    // ✅ #5 — نكتشف اتجاه اللغة لعكس السهم
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -878,10 +949,11 @@ class _SupplierProfileTab extends StatelessWidget {
             margin: const EdgeInsets.only(top: 8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-                color: const Color(0xFF3B82F6).withOpacity(0.12),
+                // ✅ #2
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                    color: const Color(0xFF3B82F6).withOpacity(0.3))),
+                    color: const Color(0xFF3B82F6).withValues(alpha: 0.3))),
             child: Text('مورّد معتمد',
                 style: GoogleFonts.cairo(
                     fontSize: 11,
@@ -890,13 +962,13 @@ class _SupplierProfileTab extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           _profileItem(Icons.storefront_outlined, 'بيانات المتجر',
-              'الاسم، العنوان، التواصل'),
+              'الاسم، العنوان، التواصل', isRtl),
           _profileItem(Icons.category_outlined, 'تصنيفات المواد',
-              'حدّد المواد التي تبيعها'),
-          _profileItem(
-              Icons.location_on_outlined, 'منطقة التغطية', 'المدن التي تخدمها'),
-          _profileItem(
-              Icons.notifications_outlined, 'الإشعارات', 'إعدادات التنبيهات'),
+              'حدّد المواد التي تبيعها', isRtl),
+          _profileItem(Icons.location_on_outlined, 'منطقة التغطية',
+              'المدن التي تخدمها', isRtl),
+          _profileItem(Icons.notifications_outlined, 'الإشعارات',
+              'إعدادات التنبيهات', isRtl),
           const SizedBox(height: 16),
           GestureDetector(
             onTap: () async {
@@ -913,9 +985,11 @@ class _SupplierProfileTab extends StatelessWidget {
               height: 50,
               margin: const EdgeInsets.only(bottom: 24),
               decoration: BoxDecoration(
-                  color: AppTheme.danger.withOpacity(0.08),
+                  // ✅ #2
+                  color: AppTheme.danger.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppTheme.danger.withOpacity(0.3))),
+                  border: Border.all(
+                      color: AppTheme.danger.withValues(alpha: 0.3))),
               child: Center(
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
                 const Icon(Icons.logout, color: AppTheme.danger, size: 18),
@@ -933,7 +1007,8 @@ class _SupplierProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _profileItem(IconData icon, String label, String sub) {
+  // ✅ #5 — السهم يتكيف مع RTL
+  Widget _profileItem(IconData icon, String label, String sub, bool isRtl) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -956,8 +1031,12 @@ class _SupplierProfileTab extends StatelessWidget {
               style:
                   GoogleFonts.cairo(fontSize: 11, color: AppTheme.textMuted)),
         ])),
-        const Icon(Icons.arrow_forward_ios,
-            size: 14, color: AppTheme.textMuted),
+        // ✅ #5 — عكس السهم في RTL
+        Transform.flip(
+          flipX: isRtl,
+          child: const Icon(Icons.arrow_forward_ios,
+              size: 14, color: AppTheme.textMuted),
+        ),
       ]),
     );
   }
@@ -1004,7 +1083,10 @@ class _StatCard extends StatelessWidget {
   }
 }
 
+// ✅ #7 — const constructors
 class _EmptyOrders extends StatelessWidget {
+  const _EmptyOrders({super.key});
+
   @override
   Widget build(BuildContext context) => Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -1024,7 +1106,10 @@ class _EmptyOrders extends StatelessWidget {
       ).animate().fadeIn(delay: 200.ms);
 }
 
+// ✅ #7 — const constructors
 class _EmptyOffers extends StatelessWidget {
+  const _EmptyOffers({super.key});
+
   @override
   Widget build(BuildContext context) => Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [

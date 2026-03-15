@@ -10,6 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/project_model.dart';
 import '../models/quote_request_model.dart';
+import 'storage_service.dart';
 
 class FirestoreService {
   static final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -66,6 +67,10 @@ class FirestoreService {
   // ════════════════════════════════════════════════════════
 
   static Future<void> saveProject(Project project) async {
+    // حفظ محلياً أولاً (Cache)
+    await StorageService.saveProjectLocal(project);
+
+    // ثم حفظ على Firestore
     final col = _userProjects;
     if (col == null) return;
     try {
@@ -73,7 +78,15 @@ class FirestoreService {
         ...project.toMap(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
-    } catch (_) {}
+    } catch (e) {
+      // إذا فشل، أضف للـ queue
+      await StorageService.queueOperation(
+        type: 'save',
+        entity: 'project',
+        id: project.id,
+        data: project.toMap(),
+      );
+    }
   }
 
   static Stream<List<Project>> projectsStream() {
@@ -116,11 +129,60 @@ class FirestoreService {
   }
 
   static Future<void> deleteProject(String projectId) async {
+    // حذف محلياً أولاً
+    await StorageService.deleteProjectLocal(projectId);
+
+    // ثم حذف من Firestore
     final col = _userProjects;
     if (col == null) return;
     try {
       await col.doc(projectId).delete();
-    } catch (_) {}
+    } catch (e) {
+      // إذا فشل، أضف للـ queue
+      await StorageService.queueOperation(
+        type: 'delete',
+        entity: 'project',
+        id: projectId,
+      );
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  Duplicate مشروع (كـ قالب)
+  // ══════════════════════════════════════════════════════════
+  static Future<Project?> duplicateProject(
+      Project original, String newName) async {
+    final col = _userProjects;
+    if (col == null) return null;
+    try {
+      final newId =
+          '${original.id}_copy_${DateTime.now().millisecondsSinceEpoch}';
+      final newProject = Project(
+        id: newId,
+        name: newName,
+        buildingType: original.buildingType,
+        floors: original.floors,
+        city: original.city,
+        createdAt: DateTime.now(),
+        components: original.components
+            .map((c) => BuildingComponent(
+                  id: '${c.id}_copy',
+                  type: c.type,
+                  name: c.name,
+                  length: c.length,
+                  width: c.width,
+                  height: c.height,
+                  count: c.count,
+                ))
+            .toList(),
+        buildingCodeName: original.buildingCodeName,
+        concreteGrade: original.concreteGrade,
+      );
+      await col.doc(newId).set(newProject.toMap());
+      return newProject;
+    } catch (_) {
+      return null;
+    }
   }
 
   static Future<void> migrateLocalProjects(List<Project> localProjects) async {
@@ -378,5 +440,281 @@ class FirestoreService {
           .doc(quoteId)
           .update(update);
     } catch (_) {}
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  إدارة الموردين - المواد
+  // ══════════════════════════════════════════════════════════
+
+  /// حفظ سعر مادة
+  static Future<void> saveMaterialPrice(MaterialPrice material) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      await _db
+          .collection('suppliers')
+          .doc(uid)
+          .collection('materials')
+          .doc(material.id)
+          .set({
+        ...material.toMap(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (_) {}
+  }
+
+  /// جلب أسعار مواد المورد
+  static Stream<List<MaterialPrice>> supplierMaterialsStream() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return Stream.value([]);
+    return _db
+        .collection('suppliers')
+        .doc(uid)
+        .collection('materials')
+        .snapshots()
+        .map((snap) =>
+            snap.docs.map((doc) => MaterialPrice.fromMap(doc.data())).toList());
+  }
+
+  /// حذف مادة
+  static Future<void> deleteMaterial(String materialId) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      await _db
+          .collection('suppliers')
+          .doc(uid)
+          .collection('materials')
+          .doc(materialId)
+          .delete();
+    } catch (_) {}
+  }
+
+  /// جلب أسعار مواد كل الموردين (للمقارنة)
+  static Stream<List<MaterialPrice>> allSuppliersMaterialsStream() {
+    return _db.collectionGroup('materials').snapshots().map((snap) =>
+        snap.docs.map((doc) => MaterialPrice.fromMap(doc.data())).toList());
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  إعدادات المتجر
+  // ══════════════════════════════════════════════════════════
+
+  /// حفظ إعدادات المتجر
+  static Future<void> saveShopSettings({
+    required String shopName,
+    required String phone,
+    String? location,
+    List<String>? deliveryAreas,
+  }) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      await _db.collection('suppliers').doc(uid).set({
+        'shopName': shopName,
+        'phone': phone,
+        'location': location,
+        'deliveryAreas': deliveryAreas ?? [],
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (_) {}
+  }
+
+  /// جلب إعدادات المتجر
+  static Future<Map<String, dynamic>?> getShopSettings() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return null;
+    try {
+      final doc = await _db.collection('suppliers').doc(uid).get();
+      return doc.data();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  العروض المرسلة من المورد
+  // ══════════════════════════════════════════════════════════
+
+  /// إرسال عرض سعر للمشروع
+  static Future<void> sendOffer({
+    required String projectId,
+    required String userId,
+    required double totalPrice,
+    required List<MaterialQuantity> materials,
+    required DateTime validUntil,
+    String? notes,
+  }) async {
+    final supplierId = FirebaseAuth.instance.currentUser?.uid;
+    if (supplierId == null) return;
+
+    final offerId = 'offer_${DateTime.now().millisecondsSinceEpoch}';
+
+    try {
+      // حفظ العرض لدى المورد
+      await _db
+          .collection('suppliers')
+          .doc(supplierId)
+          .collection('sent_offers')
+          .doc(offerId)
+          .set({
+        'id': offerId,
+        'projectId': projectId,
+        'userId': userId,
+        'totalPrice': totalPrice,
+        'materials': materials
+            .map((m) => {
+                  'name': m.name,
+                  'quantity': m.quantity,
+                  'unit': m.unit,
+                  'unitPrice': m.unitPrice,
+                  'totalCost': m.totalCost,
+                })
+            .toList(),
+        'validUntil': validUntil.toIso8601String(),
+        'notes': notes,
+        'status': 'pending',
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+
+      // حفظ العرض لدى المستخدم
+      await _db
+          .collection('users')
+          .doc(userId)
+          .collection('project_offers')
+          .doc(offerId)
+          .set({
+        'id': offerId,
+        'projectId': projectId,
+        'supplierId': supplierId,
+        'totalPrice': totalPrice,
+        'materials': materials
+            .map((m) => {
+                  'name': m.name,
+                  'quantity': m.quantity,
+                  'unit': m.unit,
+                  'unitPrice': m.unitPrice,
+                  'totalCost': m.totalCost,
+                })
+            .toList(),
+        'validUntil': validUntil.toIso8601String(),
+        'notes': notes,
+        'status': 'pending',
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+    } catch (_) {}
+  }
+
+  /// جلب العروض المرسلة
+  static Stream<List<Map<String, dynamic>>> supplierSentOffersStream() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return Stream.value([]);
+    return _db
+        .collection('suppliers')
+        .doc(uid)
+        .collection('sent_offers')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snap) => snap.docs.map((doc) => doc.data()).toList());
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  طلبات المواد (Orders)
+  // ══════════════════════════════════════════════════════════
+
+  /// إنشاء طلب مواد جديد
+  static Future<void> createMaterialOrder(MaterialOrder order) async {
+    try {
+      // حفظ لدى المستخدم
+      await _db
+          .collection('users')
+          .doc(order.userId)
+          .collection('orders')
+          .doc(order.id)
+          .set(order.toMap());
+
+      // حفظ لدى المورد
+      await _db
+          .collection('suppliers')
+          .doc(order.supplierId)
+          .collection('received_orders')
+          .doc(order.id)
+          .set(order.toMap());
+    } catch (_) {}
+  }
+
+  /// جلب طلبات المستخدم
+  static Stream<List<MaterialOrder>> userOrdersStream(String userId) {
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('orders')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snap) =>
+            snap.docs.map((doc) => MaterialOrder.fromMap(doc.data())).toList());
+  }
+
+  /// جلب طلبات المورد الواردة
+  static Stream<List<MaterialOrder>> supplierOrdersStream(String supplierId) {
+    return _db
+        .collection('suppliers')
+        .doc(supplierId)
+        .collection('received_orders')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snap) =>
+            snap.docs.map((doc) => MaterialOrder.fromMap(doc.data())).toList());
+  }
+
+  /// تحديث حالة الطلب
+  static Future<void> updateOrderStatus({
+    required String orderId,
+    required String userId,
+    required String supplierId,
+    required OrderStatus newStatus,
+  }) async {
+    try {
+      final now = DateTime.now();
+      final update = {
+        'status': newStatus.name,
+        'updatedAt': now.toIso8601String(),
+        if (newStatus == OrderStatus.completed)
+          'completedAt': now.toIso8601String(),
+      };
+
+      // تحديث لدى المستخدم
+      await _db
+          .collection('users')
+          .doc(userId)
+          .collection('orders')
+          .doc(orderId)
+          .update(update);
+
+      // تحديث لدى المورد
+      await _db
+          .collection('suppliers')
+          .doc(supplierId)
+          .collection('received_orders')
+          .doc(orderId)
+          .update(update);
+    } catch (_) {}
+  }
+
+  /// جلب عرض معين للمشروع
+  static Future<Map<String, dynamic>?> getProjectOffer(
+      String projectId, String supplierId) async {
+    try {
+      final doc = await _db
+          .collection('users')
+          .doc(supplierId)
+          .collection('project_offers')
+          .where('projectId', isEqualTo: projectId)
+          .limit(1)
+          .get();
+      return doc.docs.isNotEmpty ? doc.docs.first.data() : null;
+    } catch (_) {
+      return null;
+    }
   }
 }

@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════
-//  screens/new_project_screen.dart  ✅ نسخة مُصحَّحة
+//  screens/new_project_screen.dart  ✅ نسخة مُصحَّحة (المراجعة الثانية)
 //
 //  الإصلاحات المطبّقة:
 //  ✅ #1  جميع النصوص المُضمَّنة → t.tr() (نوع المنشأ، الطوابق، المدينة، الزر)
@@ -8,6 +8,9 @@
 //  ✅ #4  FocusScope.unfocus() قبل الانتقال لمنع overflow الكيبورد
 //  ✅ #5  textInputAction + onFieldSubmitted على حقلَي النموذج
 //  ✅ #6  حقل المدينة: validator يستخدم t.tr() بدل نص مُضمَّن
+//  ✅ #7  مفاتيح الترجمة الناقصة أُضيفت في جميع ملفات arb (6 مفاتيح)
+//  ✅ #8  سهم زر التالي يتكيف مع RTL بشكل صحيح
+//  ✅ #9  textInputAction + onFieldSubmitted بين حقلَي الاسم والمدينة
 // ══════════════════════════════════════════════════════════
 
 import 'package:flutter/material.dart';
@@ -37,6 +40,8 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
 
   BuildingType _selectedType = BuildingType.villa;
   int _floors = 1;
+  ConcreteGrade _selectedConcrete = ConcreteGrade.C20;
+  ReinforcementType _selectedReinforcement = ReinforcementType.traditional;
 
   @override
   void dispose() {
@@ -65,6 +70,8 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
       floors: _floors,
       city: _cityCtrl.text.trim(),
       createdAt: DateTime.now(),
+      concreteGrade: _selectedConcrete,
+      reinforcementType: _selectedReinforcement,
     );
 
     Navigator.push(
@@ -110,7 +117,10 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
                         label: t.tr('projectName'),
                         hint: t.tr('projectNameHint'),
                         controller: _nameCtrl,
-                        // ✅ #5
+                        focusNode: _nameFocus, // ✅ #9
+                        textInputAction: TextInputAction.next, // ✅ #9
+                        onFieldSubmitted: (_) =>
+                            FocusScope.of(context).requestFocus(_cityFocus),
                         prefixIcon: const Icon(Icons.drive_file_rename_outline,
                             color: AppTheme.textMuted, size: 18),
                         validator: (v) => (v == null || v.trim().isEmpty)
@@ -238,6 +248,9 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
                         label: t.tr('cityLabel'),
                         hint: t.tr('cityHint'),
                         controller: _cityCtrl,
+                        focusNode: _cityFocus, // ✅ #9
+                        textInputAction: TextInputAction.done, // ✅ #9
+                        onFieldSubmitted: (_) => _next(),
                         prefixIcon: const Icon(Icons.location_on_outlined,
                             color: AppTheme.textMuted, size: 18),
                         validator: (v) => (v == null || v.trim().isEmpty)
@@ -247,6 +260,103 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
                           .animate(delay: 230.ms)
                           .fadeIn()
                           .slideY(begin: 0.1, end: 0),
+                      const SizedBox(height: 18),
+
+                      // ── نوع الخرسانة ───────────────────────
+                      Text(t.tr('concreteGrade'),
+                          style: GoogleFonts.cairo(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textSub)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: ConcreteGrade.values.map((cg) {
+                          final selected = cg == _selectedConcrete;
+                          return GestureDetector(
+                            onTap: () => setState(() => _selectedConcrete = cg),
+                            child: AnimatedContainer(
+                              duration: 200.ms,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: selected
+                                    ? AppTheme.accentGlow
+                                    : AppTheme.surface,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: selected
+                                      ? AppTheme.accent
+                                      : AppTheme.border,
+                                ),
+                              ),
+                              child: Text(cg.label,
+                                  style: GoogleFonts.cairo(
+                                      fontSize: 11,
+                                      color: selected
+                                          ? AppTheme.accent
+                                          : AppTheme.textMuted,
+                                      fontWeight: selected
+                                          ? FontWeight.w700
+                                          : FontWeight.normal)),
+                            ),
+                          );
+                        }).toList(),
+                      ).animate(delay: 260.ms).fadeIn(),
+                      const SizedBox(height: 18),
+
+                      // ── نوع التسليح ─────────────────────────
+                      Text(t.tr('reinforcementType'),
+                          style: GoogleFonts.cairo(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textSub)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: ReinforcementType.values.map((rt) {
+                          final selected = rt == _selectedReinforcement;
+                          return GestureDetector(
+                            onTap: () =>
+                                setState(() => _selectedReinforcement = rt),
+                            child: AnimatedContainer(
+                              duration: 200.ms,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: selected
+                                    ? AppTheme.accentGlow
+                                    : AppTheme.surface,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: selected
+                                      ? AppTheme.accent
+                                      : AppTheme.border,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(rt.emoji,
+                                      style: const TextStyle(fontSize: 12)),
+                                  const SizedBox(width: 4),
+                                  Text(rt.label,
+                                      style: GoogleFonts.cairo(
+                                          fontSize: 11,
+                                          color: selected
+                                              ? AppTheme.accent
+                                              : AppTheme.textMuted,
+                                          fontWeight: selected
+                                              ? FontWeight.w700
+                                              : FontWeight.normal)),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ).animate(delay: 280.ms).fadeIn(),
                       const SizedBox(height: 30),
                     ],
                   ),
@@ -260,7 +370,7 @@ class _NewProjectScreenState extends State<NewProjectScreen> {
               child: GoldenButton(
                 // ✅ #1
                 label: t.tr('nextDimensions'),
-                icon: isRtl ? '→' : '←',
+                icon: isRtl ? '←' : '→', // ✅ #8
                 onTap: _next,
               ).animate(delay: 280.ms).fadeIn().slideY(begin: 0.15, end: 0),
             ),

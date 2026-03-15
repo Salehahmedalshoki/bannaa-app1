@@ -57,7 +57,7 @@ class BannaaApp extends StatelessWidget {
     return MaterialApp(
       title: 'بنّاء',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.theme,
+      theme: settings.darkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
       locale: locale,
       supportedLocales: BannaaLocalizations.supportedLocales,
       localizationsDelegates: const [

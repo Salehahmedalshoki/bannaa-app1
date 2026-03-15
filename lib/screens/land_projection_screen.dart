@@ -103,7 +103,7 @@ class _LandProjectionScreenState extends State<LandProjectionScreen>
       Polygon(
         polygonId: const PolygonId('land'),
         points: _boundaryPoints,
-        fillColor: AppTheme.accent.withOpacity(0.2),
+        fillColor: AppTheme.accent.withValues(alpha: 0.2),
         strokeColor: AppTheme.accent,
         strokeWidth: 3,
       ),
@@ -366,11 +366,11 @@ class _LandProjectionScreenState extends State<LandProjectionScreen>
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: [
-            AppTheme.accent.withOpacity(0.08),
-            AppTheme.accent.withOpacity(0.03)
+            AppTheme.accent.withValues(alpha: 0.08),
+            AppTheme.accent.withValues(alpha: 0.03)
           ]),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.accent.withOpacity(0.2)),
+          border: Border.all(color: AppTheme.accent.withValues(alpha: 0.2)),
         ),
         child: Row(children: [
           AnimatedBuilder(
@@ -449,16 +449,17 @@ class _LandProjectionScreenState extends State<LandProjectionScreen>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: AppTheme.background.withOpacity(0.96),
+            color: AppTheme.background.withValues(alpha: 0.96),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
                 color: n == 0
                     ? AppTheme.border
                     : n < 3
-                        ? AppTheme.accent.withOpacity(0.4)
-                        : AppTheme.success.withOpacity(0.5)),
+                        ? AppTheme.accent.withValues(alpha: 0.4)
+                        : AppTheme.success.withValues(alpha: 0.5)),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 14)
+              BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35), blurRadius: 14)
             ],
           ),
           child:
@@ -506,11 +507,11 @@ class _LandProjectionScreenState extends State<LandProjectionScreen>
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: (n >= 3 ? AppTheme.success : AppTheme.accent)
-                        .withOpacity(0.12),
+                        .withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                         color: (n >= 3 ? AppTheme.success : AppTheme.accent)
-                            .withOpacity(0.3)),
+                            .withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     n < 3 ? 'يحتاج ${3 - n} نقطة' : 'جاهز ✓',
@@ -635,7 +636,7 @@ class _LandProjectionScreenState extends State<LandProjectionScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: AppTheme.surface.withOpacity(0.97),
+                color: AppTheme.surface.withValues(alpha: 0.97),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppTheme.border),
               ),
@@ -686,10 +687,11 @@ class _LandProjectionScreenState extends State<LandProjectionScreen>
           decoration: BoxDecoration(
             color: AppTheme.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.success.withOpacity(0.4)),
+            border: Border.all(color: AppTheme.success.withValues(alpha: 0.4)),
             boxShadow: [
               BoxShadow(
-                  color: AppTheme.success.withOpacity(0.06), blurRadius: 16)
+                  color: AppTheme.success.withValues(alpha: 0.06),
+                  blurRadius: 16)
             ],
           ),
           child: Column(children: [
@@ -697,7 +699,7 @@ class _LandProjectionScreenState extends State<LandProjectionScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                    color: AppTheme.success.withOpacity(0.12),
+                    color: AppTheme.success.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10)),
                 child: const Text('✅', style: TextStyle(fontSize: 20)),
               ),
@@ -722,9 +724,10 @@ class _LandProjectionScreenState extends State<LandProjectionScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppTheme.danger.withOpacity(0.1),
+                    color: AppTheme.danger.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.danger.withOpacity(0.3)),
+                    border: Border.all(
+                        color: AppTheme.danger.withValues(alpha: 0.3)),
                   ),
                   child: Row(children: [
                     const Icon(Icons.edit, size: 13, color: AppTheme.danger),
@@ -853,7 +856,7 @@ class _LandProjectionScreenState extends State<LandProjectionScreen>
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
                       color: _buildingUse == use
-                          ? AppTheme.accent.withOpacity(0.15)
+                          ? AppTheme.accent.withValues(alpha: 0.15)
                           : AppTheme.surface,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
@@ -884,7 +887,8 @@ class _LandProjectionScreenState extends State<LandProjectionScreen>
           decoration: BoxDecoration(
               color: AppTheme.surface,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppTheme.accent.withOpacity(0.3))),
+              border:
+                  Border.all(color: AppTheme.accent.withValues(alpha: 0.3))),
           child: Row(children: [
             Expanded(
                 child: _Stat(
@@ -939,7 +943,7 @@ class _StatusIcon extends StatelessWidget {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: AppTheme.accent.withOpacity(0.12),
+          color: AppTheme.accent.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Center(child: Text('✏️', style: TextStyle(fontSize: 16))),
@@ -950,9 +954,10 @@ class _StatusIcon extends StatelessWidget {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: AppTheme.accent.withOpacity(0.15),
+          color: AppTheme.accent.withValues(alpha: 0.15),
           shape: BoxShape.circle,
-          border: Border.all(color: AppTheme.accent.withOpacity(0.5), width: 2),
+          border: Border.all(
+              color: AppTheme.accent.withValues(alpha: 0.5), width: 2),
         ),
         child: Center(
             child: Text(
@@ -968,9 +973,10 @@ class _StatusIcon extends StatelessWidget {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: AppTheme.success.withOpacity(0.15),
+        color: AppTheme.success.withValues(alpha: 0.15),
         shape: BoxShape.circle,
-        border: Border.all(color: AppTheme.success.withOpacity(0.5), width: 2),
+        border: Border.all(
+            color: AppTheme.success.withValues(alpha: 0.5), width: 2),
       ),
       child: Center(
           child: Text(
@@ -999,9 +1005,9 @@ class _InfoBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Text(icon, style: const TextStyle(fontSize: 12)),
@@ -1046,11 +1052,12 @@ class _MapActionBtn extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: AppTheme.background.withOpacity(0.95),
+            color: AppTheme.background.withValues(alpha: 0.95),
             shape: BoxShape.circle,
-            border: Border.all(color: color.withOpacity(0.4)),
+            border: Border.all(color: color.withValues(alpha: 0.4)),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 8)
+              BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.25), blurRadius: 8)
             ],
           ),
           child: Icon(icon, color: color, size: 20),
@@ -1071,9 +1078,9 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Text(icon, style: const TextStyle(fontSize: 11)),

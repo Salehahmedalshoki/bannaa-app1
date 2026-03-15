@@ -1,11 +1,14 @@
 // ══════════════════════════════════════════════════════════
-//  screens/results_screen.dart — المرحلة الثالثة
-//  ✅ رسم بياني دائري تفاعلي (CustomPainter)
-//  ✅ أرقام تتحرك تصاعدياً عند الظهور
-//  ✅ ملخص تنفيذي في الأعلى
-//  ✅ مقارنة بصرية بين المكوّنات بأشرطة تقدم
-//  ✅ اختيار شريحة من الدائرة يُظهر التفاصيل
-//  ✅ زر "اطلب عرض سعر من مورّد"
+//  screens/results_screen.dart  ✅ نسخة مُصحَّحة نهائية
+//
+//  ✅ #1  withValues(alpha:) بدل withOpacity المُهمَلة
+//  ✅ #2  مفاتيح الترجمة: costDistribution, materialComparison, requestQuoteBtn
+//  ✅ #3  نص زر عرض السعر → t.tr('requestQuoteBtn')
+//  ✅ #4  _buildActionButtons تستقبل materials جاهزة — لا إعادة حساب
+//  ✅ #5  _handlePieTap: GlobalKey على GestureDetector (حساب موقع دقيق)
+//  ✅ #6  _saveProject داخل State مع _isSaving guard
+//  ✅ #7  _isExporting guard يمنع تصدير مزدوج
+//  ✅ #8  حساب materials مرة واحدة في build
 // ══════════════════════════════════════════════════════════
 
 import 'dart:math';
@@ -41,12 +44,15 @@ class _ResultsScreenState extends State<ResultsScreen>
   late final Animation<double> _numAnim;
 
   bool _isExporting = false;
-  int _selectedSlice = -1; // الشريحة المختارة في الدائرة
+  bool _isSaving = false;
+  int _selectedSlice = -1;
+
+  // ✅ #5
+  final _pieKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-
     _pieCtrl = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1100));
     _pieAnim = CurvedAnimation(parent: _pieCtrl, curve: Curves.easeOutCubic);
@@ -55,7 +61,6 @@ class _ResultsScreenState extends State<ResultsScreen>
         vsync: this, duration: const Duration(milliseconds: 1400));
     _numAnim = CurvedAnimation(parent: _numCtrl, curve: Curves.easeOutExpo);
 
-    // تشغيل الأنيميشن بعد البناء
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _pieCtrl.forward();
       _numCtrl.forward();
@@ -69,7 +74,9 @@ class _ResultsScreenState extends State<ResultsScreen>
     super.dispose();
   }
 
+  // ✅ #7
   Future<void> _exportPdf() async {
+    if (_isExporting) return;
     final t = BannaaLocalizations.of(context);
     setState(() => _isExporting = true);
     try {
@@ -85,9 +92,28 @@ class _ResultsScreenState extends State<ResultsScreen>
     }
   }
 
+  // ✅ #6 — _saveProject داخل _ResultsScreenState
+  Future<void> _saveProject() async {
+    if (_isSaving) return;
+    final t = BannaaLocalizations.of(context);
+    setState(() => _isSaving = true);
+    try {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(t.tr('savedSuccess2'),
+                style: GoogleFonts.cairo(color: Colors.white)),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating));
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = BannaaLocalizations.of(context);
+    // ✅ #8 — قراءة وحساب مرة واحدة
     final s = context.watch<AppSettingsProvider>();
     final mix = s.currentMix;
     final prices = PriceSheet(
@@ -98,27 +124,26 @@ class _ResultsScreenState extends State<ResultsScreen>
       waterPerM3: s.prices['water'] ?? 5,
       currencySymbol: s.currencyInfo.symbol,
     );
-    final mixParams = MixParameters(
-        cementKgPerM3: mix.cementKgPerM3,
-        sandM3PerM3: mix.sandM3PerM3,
-        gravelM3PerM3: mix.gravelM3PerM3,
-        waterLPerM3: mix.waterLPerM3,
-        steelKgPerM3: mix.steelKgPerM3);
+
+    // استخدام ConcreteGrade من الإعدادات
+    final concreteGrade = widget.project.concreteGrade ??
+        ConcreteGrade.values.firstWhere((g) => g.label.contains(mix.grade),
+            orElse: () => ConcreteGrade.C20);
+
     final materials =
-        widget.project.calculateMaterials(mix: mixParams, prices: prices);
+        widget.project.calculateMaterials(grade: concreteGrade, prices: prices);
     final totalCost = materials.fold(0.0, (sum, m) => sum + m.totalCost);
 
     return Scaffold(
       body: SafeArea(
         child: Column(children: [
-          // ── شريط العنوان ──
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
             child: ScreenHeader(
               title: t.tr('resultsTitle'),
               actions: [
                 GestureDetector(
-                  onTap: _exportPdf,
+                  onTap: _isExporting ? null : _exportPdf,
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -137,30 +162,21 @@ class _ResultsScreenState extends State<ResultsScreen>
               ],
             ),
           ),
-
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(20),
               physics: const BouncingScrollPhysics(),
               children: [
-                // ── 1. الملخص التنفيذي ──
                 _buildSummaryCard(t, s, totalCost),
                 const SizedBox(height: 16),
-
-                // ── 2. الرسم البياني الدائري ──
                 _buildPieChartSection(materials, totalCost, t),
                 const SizedBox(height: 16),
-
-                // ── 3. مقارنة بصرية بأشرطة ──
                 _buildBarsSection(materials, totalCost, t),
                 const SizedBox(height: 16),
-
-                // ── 4. تفاصيل المواد ──
                 _buildMaterialsList(materials, s, t),
                 const SizedBox(height: 16),
-
-                // ── 5. أزرار الحفظ والتصدير ──
-                _buildActionButtons(t),
+                // ✅ #4 — materials تُمرَّر جاهزة
+                _buildActionButtons(t, materials),
                 const SizedBox(height: 10),
               ],
             ),
@@ -181,16 +197,15 @@ class _ResultsScreenState extends State<ResultsScreen>
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
           colors: [
-            AppTheme.accent.withOpacity(0.18),
+            AppTheme.accent.withValues(alpha: 0.18),
             AppTheme.surface,
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.accent.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.accent.withValues(alpha: 0.3)),
       ),
       padding: const EdgeInsets.all(18),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // بادج نوع المبنى والكود
         Row(children: [
           Text(widget.project.buildingType.emoji,
               style: const TextStyle(fontSize: 20)),
@@ -204,9 +219,10 @@ class _ResultsScreenState extends State<ResultsScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-                color: AppTheme.success.withOpacity(0.12),
+                color: AppTheme.success.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppTheme.success.withOpacity(0.25))),
+                border: Border.all(
+                    color: AppTheme.success.withValues(alpha: 0.25))),
             child: Text(t.tr('completed'),
                 style: GoogleFonts.cairo(
                     fontSize: 10,
@@ -215,8 +231,6 @@ class _ResultsScreenState extends State<ResultsScreen>
           ),
         ]),
         const SizedBox(height: 16),
-
-        // الأرقام الكبيرة
         Row(children: [
           Expanded(
               child: _AnimatedStat(
@@ -275,12 +289,12 @@ class _ResultsScreenState extends State<ResultsScreen>
                 color: AppTheme.textPrimary)),
         const SizedBox(height: 18),
         Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          // الرسم الدائري
           Expanded(
             flex: 5,
             child: AspectRatio(
               aspectRatio: 1,
               child: GestureDetector(
+                key: _pieKey,
                 onTapUp: (details) =>
                     _handlePieTap(details, materials, totalCost),
                 child: AnimatedBuilder(
@@ -299,7 +313,6 @@ class _ResultsScreenState extends State<ResultsScreen>
             ),
           ),
           const SizedBox(width: 16),
-          // المفتاح التفاعلي
           Expanded(
             flex: 4,
             child: Column(
@@ -310,7 +323,6 @@ class _ResultsScreenState extends State<ResultsScreen>
                 final pct = totalCost > 0 ? m.totalCost / totalCost * 100 : 0.0;
                 final isSelected = _selectedSlice == i;
                 final color = _pieColor(i);
-
                 return GestureDetector(
                   onTap: () {
                     HapticFeedback.selectionClick();
@@ -323,12 +335,12 @@ class _ResultsScreenState extends State<ResultsScreen>
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? color.withOpacity(0.12)
+                          ? color.withValues(alpha: 0.12)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                           color: isSelected
-                              ? color.withOpacity(0.3)
+                              ? color.withValues(alpha: 0.3)
                               : Colors.transparent),
                     ),
                     child: Row(children: [
@@ -342,7 +354,7 @@ class _ResultsScreenState extends State<ResultsScreen>
                           child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(m.icon + ' ' + m.name,
+                          Text('${m.icon} ${m.name}',
                               style: GoogleFonts.cairo(
                                   fontSize: 11,
                                   fontWeight: isSelected
@@ -365,8 +377,6 @@ class _ResultsScreenState extends State<ResultsScreen>
             ),
           ),
         ]),
-
-        // تفاصيل الشريحة المختارة
         if (_selectedSlice >= 0 && _selectedSlice < materials.length) ...[
           const SizedBox(height: 14),
           _buildSliceDetail(
@@ -415,9 +425,9 @@ class _ResultsScreenState extends State<ResultsScreen>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.07),
+        color: color.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(children: [
         Text(m.icon, style: const TextStyle(fontSize: 22)),
@@ -437,7 +447,7 @@ class _ResultsScreenState extends State<ResultsScreen>
           ],
         )),
         Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Text('${m.totalCost.toStringAsFixed(0)}',
+          Text(m.totalCost.toStringAsFixed(0),
               style: GoogleFonts.cairo(
                   fontSize: 16, fontWeight: FontWeight.w900, color: color)),
           Text('$pct% من الإجمالي',
@@ -448,12 +458,14 @@ class _ResultsScreenState extends State<ResultsScreen>
     );
   }
 
+  // ✅ #5 — GlobalKey للحصول على حجم الـ pie بدقة
   void _handlePieTap(TapUpDetails details, List<MaterialQuantity> materials,
       double totalCost) {
-    // حساب زاوية النقرة
-    final RenderBox box = context.findRenderObject() as RenderBox;
-    final size = box.size;
-    final center = Offset(size.width / 2, size.width / 2);
+    final RenderBox? pieBox =
+        _pieKey.currentContext?.findRenderObject() as RenderBox?;
+    if (pieBox == null) return;
+    final size = pieBox.size;
+    final center = Offset(size.width / 2, size.height / 2);
     final touch = details.localPosition - center;
     double angle = atan2(touch.dy, touch.dx) + pi / 2;
     if (angle < 0) angle += 2 * pi;
@@ -506,7 +518,7 @@ class _ResultsScreenState extends State<ResultsScreen>
                   animation: _numAnim,
                   builder: (_, __) {
                     final animated = m.totalCost * _numAnim.value;
-                    return Text('${animated.toStringAsFixed(0)}',
+                    return Text(animated.toStringAsFixed(0),
                         style: GoogleFonts.cairo(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -570,9 +582,10 @@ class _ResultsScreenState extends State<ResultsScreen>
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                    color: _pieColor(i).withOpacity(0.12),
+                    color: _pieColor(i).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(11),
-                    border: Border.all(color: _pieColor(i).withOpacity(0.2))),
+                    border:
+                        Border.all(color: _pieColor(i).withValues(alpha: 0.2))),
                 child: Center(
                     child: Text(m.icon, style: const TextStyle(fontSize: 19))),
               ),
@@ -636,32 +649,12 @@ class _ResultsScreenState extends State<ResultsScreen>
   }
 
   // ════════════════════════════════════════════════════════
-  //  5. أزرار الإجراءات
+  //  5. أزرار الإجراءات — ✅ #4 تستقبل materials جاهزة
   // ════════════════════════════════════════════════════════
-  Widget _buildActionButtons(BannaaLocalizations t) {
-    // جلب materials من السياق الحالي
-    final s = context.watch<AppSettingsProvider>();
-    final mix = s.currentMix;
-    final prices = PriceSheet(
-      cementPerBag: s.prices['cement'] ?? 50,
-      sandPerM3: s.prices['sand'] ?? 150,
-      gravelPerM3: s.prices['gravel'] ?? 180,
-      steelPerKg: s.prices['steel'] ?? 4,
-      waterPerM3: s.prices['water'] ?? 5,
-      currencySymbol: s.currencyInfo.symbol,
-    );
-    final mixParams = MixParameters(
-      cementKgPerM3: mix.cementKgPerM3,
-      sandM3PerM3: mix.sandM3PerM3,
-      gravelM3PerM3: mix.gravelM3PerM3,
-      waterLPerM3: mix.waterLPerM3,
-      steelKgPerM3: mix.steelKgPerM3,
-    );
-    final materials =
-        widget.project.calculateMaterials(mix: mixParams, prices: prices);
-
+  Widget _buildActionButtons(
+      BannaaLocalizations t, List<MaterialQuantity> materials) {
     return Column(children: [
-      // زر طلب عرض السعر — بارز في الأعلى
+      // ✅ #3 — نص من نظام الترجمة
       GestureDetector(
         onTap: () => QuoteRequestSheet.show(
           context,
@@ -677,7 +670,7 @@ class _ResultsScreenState extends State<ResultsScreen>
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                    color: const Color(0xFF3B82F6).withOpacity(0.3),
+                    color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
                     blurRadius: 16,
                     offset: const Offset(0, 5))
               ]),
@@ -686,7 +679,7 @@ class _ResultsScreenState extends State<ResultsScreen>
             const Icon(Icons.storefront_outlined,
                 color: Colors.white, size: 18),
             const SizedBox(width: 8),
-            Text('اطلب عرض سعر من مورّد',
+            Text(t.tr('requestQuoteBtn'),
                 style: GoogleFonts.cairo(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -695,21 +688,15 @@ class _ResultsScreenState extends State<ResultsScreen>
         ),
       ).animate(delay: 100.ms).fadeIn().slideY(begin: 0.2, end: 0),
       const SizedBox(height: 10),
-
-      // PDF + حفظ
       Row(children: [
+        // ✅ #6 — يستدعي _saveProject من الـ State
         Expanded(
             child: GoldenButton(
                 label: t.tr('save'),
                 icon: '💾',
                 outline: true,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(t.tr('savedSuccess2'),
-                          style: GoogleFonts.cairo(color: Colors.white)),
-                      backgroundColor: AppTheme.success,
-                      behavior: SnackBarBehavior.floating));
-                })),
+                isLoading: _isSaving,
+                onTap: _saveProject)),
         const SizedBox(width: 10),
         Expanded(
             flex: 2,
@@ -717,7 +704,7 @@ class _ResultsScreenState extends State<ResultsScreen>
                 label: t.tr('generatePdfBtn'),
                 icon: '📄',
                 isLoading: _isExporting,
-                onTap: _exportPdf)),
+                onTap: _isExporting ? null : _exportPdf)),
       ]),
     ]);
   }
@@ -748,7 +735,7 @@ class _ResultsScreenState extends State<ResultsScreen>
 class _PieChartPainter extends CustomPainter {
   final List<MaterialQuantity> materials;
   final double totalCost;
-  final double progress; // 0→1 (أنيميشن)
+  final double progress;
   final int selectedIndex;
 
   _PieChartPainter({
@@ -771,7 +758,6 @@ class _PieChartPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width, size.height) / 2 - 8;
     final holeRadius = radius * 0.52;
-
     double startAngle = -pi / 2;
 
     for (int i = 0; i < materials.length; i++) {
@@ -784,7 +770,6 @@ class _PieChartPainter extends CustomPainter {
         ..color = color
         ..style = PaintingStyle.fill;
 
-      // تكبير الشريحة المختارة
       Offset sliceCenter = center;
       if (isSelected) {
         final midAngle = startAngle + sweep / 2;
@@ -798,17 +783,14 @@ class _PieChartPainter extends CustomPainter {
       path.close();
       canvas.drawPath(path, paint);
 
-      // فراغ بين الشرائح
       final separatorPaint = Paint()
         ..color = const Color(0xFF0A0F1E)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.5;
       canvas.drawPath(path, separatorPaint);
-
       startAngle += sweep;
     }
 
-    // ثقب الدونت
     final holePaint = Paint()
       ..color = const Color(0xFF111827)
       ..style = PaintingStyle.fill;
@@ -821,7 +803,7 @@ class _PieChartPainter extends CustomPainter {
 }
 
 // ════════════════════════════════════════════════════════
-//  ودجة: رقم متحرك تصاعدياً
+//  ودجة مستقلة: رقم متحرك تصاعدياً
 // ════════════════════════════════════════════════════════
 class _AnimatedStat extends StatelessWidget {
   final Animation<double> animation;

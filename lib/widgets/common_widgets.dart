@@ -45,7 +45,7 @@ class GoldenButton extends StatelessWidget {
               ? null
               : [
                   BoxShadow(
-                    color: AppTheme.accent.withOpacity(0.3),
+                    color: AppTheme.accent.withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 6),
                   ),
@@ -112,7 +112,7 @@ class DarkCard extends StatelessWidget {
           boxShadow: highlighted
               ? [
                   BoxShadow(
-                    color: AppTheme.accent.withOpacity(0.1),
+                    color: AppTheme.accent.withValues(alpha: 0.1),
                     blurRadius: 12,
                   ),
                 ]
@@ -135,6 +135,10 @@ class AppTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final bool readOnly;
   final VoidCallback? onTap;
+  // ✅ إضافات للتنقل بين الحقول
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+  final void Function(String)? onFieldSubmitted;
 
   const AppTextField({
     super.key,
@@ -147,6 +151,9 @@ class AppTextField extends StatelessWidget {
     this.prefixIcon,
     this.readOnly = false,
     this.onTap,
+    this.focusNode,
+    this.textInputAction,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -169,6 +176,9 @@ class AppTextField extends StatelessWidget {
           validator: validator,
           readOnly: readOnly,
           onTap: onTap,
+          focusNode: focusNode,
+          textInputAction: textInputAction,
+          onFieldSubmitted: onFieldSubmitted,
           textAlign: TextAlign.right,
           style: GoogleFonts.cairo(color: AppTheme.textPrimary, fontSize: 13),
           decoration: InputDecoration(

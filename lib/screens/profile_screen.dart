@@ -8,7 +8,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_settings_provider.dart';
 import '../services/auth_service.dart';
-import '../services/storage_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_localizations.dart';
 import '../widgets/common_widgets.dart';
@@ -220,7 +219,7 @@ class _GeneralSettingsSection extends StatelessWidget {
           trailing: Switch(
             value: s.notificationsOn,
             onChanged: s.setNotifications,
-            activeColor: AppTheme.accent,
+            activeThumbColor: AppTheme.accent,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ),
@@ -230,7 +229,7 @@ class _GeneralSettingsSection extends StatelessWidget {
           trailing: Switch(
             value: s.darkMode,
             onChanged: s.setDarkMode,
-            activeColor: AppTheme.accent,
+            activeThumbColor: AppTheme.accent,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ),
@@ -905,11 +904,13 @@ class _AccountSection extends StatelessWidget {
       for (final p in projects) {
         await FirestoreService.deleteProject(p.id);
       }
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(t.tr('projectsDeleted'),
-              style: GoogleFonts.cairo(color: Colors.white)),
-          backgroundColor: AppTheme.success,
-          behavior: SnackBarBehavior.floating));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(t.tr('projectsDeleted'),
+                style: GoogleFonts.cairo(color: Colors.white)),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating));
+      }
     }
   }
 }
@@ -989,8 +990,12 @@ class _LogoutButton extends StatelessWidget {
     );
     if (confirm == true && context.mounted) {
       await AuthService.signOut();
-      Navigator.pushAndRemoveUntil(context,
-          MaterialPageRoute(builder: (_) => const AuthWrapper()), (_) => false);
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const AuthWrapper()),
+            (_) => false);
+      }
     }
   }
 }

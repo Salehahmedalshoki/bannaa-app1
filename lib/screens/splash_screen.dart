@@ -106,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
             center: const Alignment(0, -0.2),
             radius: 0.8,
             colors: [
-              AppTheme.accent.withOpacity(0.18),
+              AppTheme.accent.withValues(alpha: 0.18),
               AppTheme.background,
             ],
           ),
@@ -128,7 +128,7 @@ class _SplashScreenState extends State<SplashScreen>
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.accent.withOpacity(0.4),
+                      color: AppTheme.accent.withValues(alpha: 0.4),
                       blurRadius: 40,
                       spreadRadius: 4,
                     ),

@@ -411,7 +411,7 @@ class _LandPlanScreenState extends State<LandPlanScreen>
                       gradient: SweepGradient(colors: [
                         AppTheme.accent,
                         AppTheme.accentDark,
-                        AppTheme.accent.withOpacity(0)
+                        AppTheme.accent.withValues(alpha: 0)
                       ])),
                 ),
               ),
@@ -515,7 +515,7 @@ class _LandPlanScreenState extends State<LandPlanScreen>
       decoration: BoxDecoration(
           color: AppTheme.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.accent.withOpacity(0.3))),
+          border: Border.all(color: AppTheme.accent.withValues(alpha: 0.3))),
       child: Row(children: [
         const Text('✅', style: TextStyle(fontSize: 22)),
         const SizedBox(width: 10),
@@ -531,7 +531,7 @@ class _LandPlanScreenState extends State<LandPlanScreen>
         Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-                color: AppTheme.success.withOpacity(0.12),
+                color: AppTheme.success.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8)),
             child: Text('${_plans.length} مخططات',
                 style: GoogleFonts.cairo(
@@ -574,7 +574,7 @@ class _PlanCard extends StatelessWidget {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                        color: AppTheme.accent.withOpacity(0.15),
+                        color: AppTheme.accent.withValues(alpha: 0.15),
                         blurRadius: 12)
                   ]
                 : null),
@@ -588,7 +588,7 @@ class _PlanCard extends StatelessWidget {
                   height: 50,
                   decoration: BoxDecoration(
                       color: isSelected
-                          ? AppTheme.accent.withOpacity(0.15)
+                          ? AppTheme.accent.withValues(alpha: 0.15)
                           : AppTheme.accentGlow,
                       borderRadius: BorderRadius.circular(13)),
                   child: Center(
@@ -666,7 +666,7 @@ class _PlanCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                            color: AppTheme.accent.withOpacity(0.08),
+                            color: AppTheme.accent.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(6)),
                         child: Text(f,
                             style: GoogleFonts.cairo(
@@ -682,7 +682,7 @@ class _PlanCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
                 color: isSelected
-                    ? AppTheme.accent.withOpacity(0.06)
+                    ? AppTheme.accent.withValues(alpha: 0.06)
                     : AppTheme.background,
                 borderRadius:
                     const BorderRadius.vertical(bottom: Radius.circular(15))),

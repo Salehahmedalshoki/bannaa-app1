@@ -104,8 +104,9 @@ class _QuoteCard extends StatelessWidget {
           color: AppTheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-              color:
-                  hasReply ? statusColor.withOpacity(0.35) : AppTheme.border)),
+              color: hasReply
+                  ? statusColor.withValues(alpha: 0.35)
+                  : AppTheme.border)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         // ── رأس البطاقة ──
         Padding(
@@ -139,9 +140,10 @@ class _QuoteCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.12),
+                  color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: statusColor.withOpacity(0.3))),
+                  border:
+                      Border.all(color: statusColor.withValues(alpha: 0.3))),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Container(
                     width: 6,
@@ -223,7 +225,7 @@ class _QuoteCard extends StatelessWidget {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.12),
+                        color: statusColor.withValues(alpha: 0.12),
                         shape: BoxShape.circle),
                     child: Icon(Icons.storefront_outlined,
                         color: statusColor, size: 13)),
@@ -239,9 +241,10 @@ class _QuoteCard extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.06),
+                    color: statusColor.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: statusColor.withOpacity(0.2))),
+                    border:
+                        Border.all(color: statusColor.withValues(alpha: 0.2))),
                 child: Text(request.supplierResponse!,
                     style: GoogleFonts.cairo(
                         fontSize: 12,
@@ -359,9 +362,9 @@ class _ActionButton extends StatelessWidget {
       child: Container(
         height: 40,
         decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: color.withOpacity(0.3))),
+            border: Border.all(color: color.withValues(alpha: 0.3))),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Icon(icon, color: color, size: 15),
           const SizedBox(width: 6),

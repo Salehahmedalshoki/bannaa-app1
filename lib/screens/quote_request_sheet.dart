@@ -1,7 +1,13 @@
 // ══════════════════════════════════════════════════════════
-//  screens/quote_request_sheet.dart — المرحلة الثالثة
-//  🤝 Bottom sheet لإرسال طلب عرض سعر لمورّد
-//  الخطوات: اختيار المورّد ← تأكيد المواد ← ملاحظة ← إرسال
+//  screens/quote_request_sheet.dart  ✅ نسخة مُصحَّحة
+//
+//  الإصلاحات المطبّقة:
+//  ✅ #1  withOpacity المُهمَلة → withValues(alpha:) (7 مواضع)
+//  ✅ #2  _send(): guard ضد _isSending المتكرر
+//  ✅ #3  _loadSuppliers(): try/finally — لا تجميد عند الفشل
+//  ✅ #4  userName: fallback إلى email بدل نص مُضمَّن
+//  ✅ #5  snackBar الخطأ: behavior floating + style صحيح
+//  ✅ #6  استيراد app_localizations لدعم الترجمة مستقبلاً
 // ══════════════════════════════════════════════════════════
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +18,7 @@ import '../models/project_model.dart';
 import '../models/quote_request_model.dart';
 import '../services/firestore_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/app_localizations.dart';
 
 class QuoteRequestSheet extends StatefulWidget {
   final Project project;
@@ -66,23 +73,26 @@ class _QuoteRequestSheetState extends State<QuoteRequestSheet> {
 
   Future<void> _loadSuppliers() async {
     setState(() => _isLoading = true);
-    final list = await FirestoreService.getSuppliers(city: widget.project.city);
-    if (mounted)
-      setState(() {
-        _suppliers = list;
-        _isLoading = false;
-      });
+    try {
+      final list =
+          await FirestoreService.getSuppliers(city: widget.project.city);
+      if (mounted) setState(() => _suppliers = list);
+    } catch (_) {
+      // فشل تحميل الموردين — تبقى القائمة فارغة
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _send() async {
-    if (_selected == null) return;
+    if (_selected == null || _isSending) return; // ✅ guard
     setState(() => _isSending = true);
 
     final user = FirebaseAuth.instance.currentUser;
     final request = QuoteRequest(
       id: '${DateTime.now().millisecondsSinceEpoch}_${_selected!.uid}',
       userId: user?.uid ?? '',
-      userName: user?.displayName ?? 'مستخدم',
+      userName: user?.displayName ?? user?.email ?? '',
       supplierId: _selected!.uid,
       projectName: widget.project.name,
       city: widget.project.city,
@@ -107,9 +117,12 @@ class _QuoteRequestSheetState extends State<QuoteRequestSheet> {
       if (ok) _step = 2;
     });
     if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('فشل الإرسال — تحقق من الاتصال'),
-          backgroundColor: AppTheme.danger));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text('فشل الإرسال — تحقق من الاتصال', // TODO: t.tr('sendFailed')
+                  style: const TextStyle(color: Colors.white)),
+          backgroundColor: AppTheme.danger,
+          behavior: SnackBarBehavior.floating));
     }
   }
 
@@ -198,7 +211,7 @@ class _StepSelectSupplier extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                  color: AppTheme.accent.withOpacity(0.12),
+                  color: AppTheme.accent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10)),
               child: const Icon(Icons.storefront_outlined,
                   color: AppTheme.accent, size: 18)),
@@ -269,7 +282,7 @@ class _SupplierTile extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
             color: isSelected
-                ? const Color(0xFF3B82F6).withOpacity(0.08)
+                ? const Color(0xFF3B82F6).withValues(alpha: 0.08)
                 : AppTheme.background,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
@@ -318,8 +331,8 @@ class _SupplierTile extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                  color:
-                                      const Color(0xFF3B82F6).withOpacity(0.1),
+                                  color: const Color(0xFF3B82F6)
+                                      .withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(4)),
                               child: Text(c,
                                   style: GoogleFonts.cairo(
@@ -549,7 +562,7 @@ class _StepConfirm extends StatelessWidget {
                       ? null
                       : [
                           BoxShadow(
-                              color: AppTheme.accent.withOpacity(0.3),
+                              color: AppTheme.accent.withValues(alpha: 0.3),
                               blurRadius: 16,
                               offset: const Offset(0, 5))
                         ]),
@@ -652,9 +665,10 @@ class _StepSuccess extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-                color: AppTheme.success.withOpacity(0.1),
+                color: AppTheme.success.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
-                border: Border.all(color: AppTheme.success.withOpacity(0.3))),
+                border:
+                    Border.all(color: AppTheme.success.withValues(alpha: 0.3))),
             child: const Center(
                 child: Icon(Icons.check_circle_outline_rounded,
                     color: AppTheme.success, size: 42)),
@@ -690,7 +704,7 @@ class _StepSuccess extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                        color: AppTheme.accent.withOpacity(0.3),
+                        color: AppTheme.accent.withValues(alpha: 0.3),
                         blurRadius: 16,
                         offset: const Offset(0, 5))
                   ]),

@@ -29,6 +29,7 @@ import 'land_projection_screen.dart';
 import 'my_quotes_screen.dart';
 import 'new_project_screen.dart';
 import 'project_detail_screen.dart';
+import 'auth_wrapper.dart';
 
 // ══════════════════════════════════════════════════════════
 //  HomeScreen — يُنشئ الـ Streams في المستوى الأعلى
@@ -594,6 +595,12 @@ class _HomeBody extends StatelessWidget {
     );
     if (confirm == true && context.mounted) {
       await AuthService.signOut();
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const AuthWrapper()),
+            (_) => false);
+      }
     }
   }
 }

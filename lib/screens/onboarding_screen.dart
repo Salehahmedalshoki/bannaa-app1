@@ -155,7 +155,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                   decoration: BoxDecoration(
-                    color: AppTheme.surface.withOpacity(0.8),
+                    color: AppTheme.surface.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: AppTheme.border),
                   ),
@@ -186,7 +186,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            AppTheme.background.withOpacity(0.97),
+            AppTheme.background.withValues(alpha: 0.97),
           ],
         ),
       ),
@@ -221,13 +221,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               gradient: LinearGradient(
                 colors: [
                   _pages[_current].color,
-                  _pages[_current].color.withOpacity(0.75),
+                  _pages[_current].color.withValues(alpha: 0.75),
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: _pages[_current].color.withOpacity(0.35),
+                  color: _pages[_current].color.withValues(alpha: 0.35),
                   blurRadius: 20,
                   offset: const Offset(0, 6),
                 ),
@@ -282,7 +282,7 @@ class _PageView extends StatelessWidget {
           center: const Alignment(0, -0.3),
           radius: 0.9,
           colors: [
-            page.color.withOpacity(0.15),
+            page.color.withValues(alpha: 0.15),
             AppTheme.background,
           ],
         ),
@@ -298,13 +298,13 @@ class _PageView extends StatelessWidget {
                 width: 110,
                 height: 110,
                 decoration: BoxDecoration(
-                  color: page.color.withOpacity(0.15),
+                  color: page.color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(32),
-                  border:
-                      Border.all(color: page.color.withOpacity(0.3), width: 2),
+                  border: Border.all(
+                      color: page.color.withValues(alpha: 0.3), width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: page.color.withOpacity(0.2),
+                      color: page.color.withValues(alpha: 0.2),
                       blurRadius: 40,
                       spreadRadius: 4,
                     ),

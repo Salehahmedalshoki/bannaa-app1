@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════
-//  screens/project_detail_screen.dart  ✅ نسخة مُصحَّحة
+//  screens/project_detail_screen.dart  ✅ نسخة مُصحَّحة (المراجعة الثانية)
 //
 //  الإصلاحات المطبّقة:
 //  ✅ #1  جميع النصوص المُضمَّنة → t.tr() (32 نصاً)
@@ -8,6 +8,9 @@
 //  ✅ #4  عرض تاريخ الإنشاء يحترم locale الجهاز
 //  ✅ #5  project ID يُعرض كاملاً أو مقطوعاً بأمان
 //  ✅ #6  زر التقرير محمي أثناء _isExporting
+//  ✅ #7  20 مفتاح ترجمة ناقص أُضيف في جميع ملفات arb
+//  ✅ #8  super.key على جميع الـ private widgets (prefer_const_constructors)
+//  ✅ #9  إصلاح Navigation: DimensionsScreen يعود بـ pop بدل pushReplacement
 // ══════════════════════════════════════════════════════════
 
 import 'package:flutter/material.dart';
@@ -17,6 +20,7 @@ import 'package:provider/provider.dart';
 import '../models/project_model.dart';
 import '../providers/app_settings_provider.dart';
 import '../services/pdf_service.dart';
+import '../services/firestore_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_localizations.dart';
 import '../widgets/common_widgets.dart';
@@ -75,6 +79,22 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
     }
   }
 
+  // 🔄 Duplicate المشروع (كـ قالب)
+  Future<void> _duplicateProject(
+      BuildContext context, BannaaLocalizations t) async {
+    final newName = '${_project.name} (نسخة)';
+    final newProject =
+        await FirestoreService.duplicateProject(_project, newName);
+
+    if (mounted && newProject != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(t.tr('projectDuplicated') ?? 'تم نسخ المشروع'),
+        backgroundColor: AppTheme.success,
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = BannaaLocalizations.of(context);
@@ -88,15 +108,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
       waterPerM3: s.prices['water'] ?? 5,
       currencySymbol: s.currencyInfo.symbol,
     );
-    final mixParams = MixParameters(
-      cementKgPerM3: mix.cementKgPerM3,
-      sandM3PerM3: mix.sandM3PerM3,
-      gravelM3PerM3: mix.gravelM3PerM3,
-      waterLPerM3: mix.waterLPerM3,
-      steelKgPerM3: mix.steelKgPerM3,
-    );
+
+    final concreteGrade = _project.concreteGrade ??
+        ConcreteGrade.values.firstWhere((g) => g.label.contains(mix.grade),
+            orElse: () => ConcreteGrade.C20);
     final materials =
-        _project.calculateMaterials(mix: mixParams, prices: prices);
+        _project.calculateMaterials(grade: concreteGrade, prices: prices);
 
     return Scaffold(
       body: SafeArea(
@@ -128,6 +145,21 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
         // ✅ #1
         title: t.tr('projectDetails'),
         actions: [
+          // زر Duplicate
+          GestureDetector(
+            onTap: _isExporting ? null : () => _duplicateProject(context, t),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.border)),
+              child: const Center(
+                  child: Text('📋', style: TextStyle(fontSize: 16))),
+            ),
+          ),
+          const SizedBox(width: 8),
           // زر PDF
           GestureDetector(
             // ✅ #2 — معطَّل أثناء التصدير
@@ -332,7 +364,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
 class _OverviewTab extends StatelessWidget {
   final Project project;
   final List<MaterialQuantity> materials;
-  const _OverviewTab({required this.project, required this.materials});
+  const _OverviewTab(
+      {super.key, required this.project, required this.materials});
 
   @override
   Widget build(BuildContext context) {
@@ -460,7 +493,8 @@ class _OverviewTab extends StatelessWidget {
 class _ComponentsTab extends StatelessWidget {
   final Project project;
   final VoidCallback onEdit;
-  const _ComponentsTab({required this.project, required this.onEdit});
+  const _ComponentsTab(
+      {super.key, required this.project, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -573,7 +607,7 @@ class _ComponentsTab extends StatelessWidget {
 class _CostTab extends StatelessWidget {
   final Project project;
   final List<MaterialQuantity> materials;
-  const _CostTab({required this.project, required this.materials});
+  const _CostTab({super.key, required this.project, required this.materials});
 
   @override
   Widget build(BuildContext context) {
@@ -658,7 +692,7 @@ class _CostTab extends StatelessWidget {
 class _CostBar extends StatelessWidget {
   final MaterialQuantity m;
   final double percent;
-  const _CostBar({required this.m, required this.percent});
+  const _CostBar({super.key, required this.m, required this.percent});
 
   @override
   Widget build(BuildContext context) {
@@ -707,6 +741,7 @@ class _StatBox extends StatelessWidget {
   final String label, value, unit, icon;
   final Color color;
   const _StatBox({
+    super.key,
     required this.label,
     required this.value,
     required this.unit,
@@ -757,7 +792,7 @@ class _StatBox extends StatelessWidget {
 // ══════════════════════════════════════════════════════════
 class _MaterialRow extends StatelessWidget {
   final MaterialQuantity m;
-  const _MaterialRow({required this.m});
+  const _MaterialRow({super.key, required this.m});
 
   @override
   Widget build(BuildContext context) {

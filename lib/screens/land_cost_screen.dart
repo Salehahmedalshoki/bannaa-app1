@@ -387,7 +387,8 @@ class _LandCostScreenState extends State<LandCostScreen>
           decoration: BoxDecoration(
               color: AppTheme.surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.accent.withOpacity(0.3))),
+              border:
+                  Border.all(color: AppTheme.accent.withValues(alpha: 0.3))),
           child: Column(children: [
             Text('إجمالي التكاليف المتوقعة',
                 style:
@@ -459,9 +460,9 @@ class _LandCostScreenState extends State<LandCostScreen>
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-              color: AppTheme.info.withOpacity(0.08),
+              color: AppTheme.info.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.info.withOpacity(0.2))),
+              border: Border.all(color: AppTheme.info.withValues(alpha: 0.2))),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text('ℹ️', style: TextStyle(fontSize: 16)),
             const SizedBox(width: 8),
@@ -726,7 +727,7 @@ class _CostSummaryRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(3),
                 child: LinearProgressIndicator(
                     value: total > 0 ? amount / total : 0,
-                    backgroundColor: color.withOpacity(0.1),
+                    backgroundColor: color.withValues(alpha: 0.1),
                     valueColor: AlwaysStoppedAnimation(color),
                     minHeight: 4)),
           ],
@@ -774,7 +775,7 @@ class _CostItemCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-                color: item.color.withOpacity(0.1),
+                color: item.color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10)),
             child: Center(
                 child: Text(item.icon, style: const TextStyle(fontSize: 16)))),
@@ -804,7 +805,7 @@ class _CostItemCard extends StatelessWidget {
           Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                  color: item.color.withOpacity(0.08),
+                  color: item.color.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(4)),
               child: Text(item.category,
                   style: GoogleFonts.cairo(fontSize: 9, color: item.color))),
@@ -840,14 +841,15 @@ class _PhaseCard extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                   border: Border.all(color: color, width: 2)),
               child: Center(
                   child: Text(phase['icon'] as String,
                       style: const TextStyle(fontSize: 18)))),
           if (index < 5)
-            Container(width: 2, height: 80, color: color.withOpacity(0.2)),
+            Container(
+                width: 2, height: 80, color: color.withValues(alpha: 0.2)),
         ]),
         const SizedBox(width: 14),
         // ── محتوى المرحلة ──
@@ -872,7 +874,7 @@ class _PhaseCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8)),
                   child: Text(phase['duration'] as String,
                       style: GoogleFonts.cairo(

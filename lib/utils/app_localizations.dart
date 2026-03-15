@@ -2142,8 +2142,7 @@ class BannaaLocalizations {
       'fr': 'Suivant : Entrer les dimensions',
       'tr': 'Sonraki: Ölçüleri girin'
     },
-    // ── مفاتيح جديدة مضافة من المراجعة ──────────────────
-    // project_detail_screen
+    // ── مفاتيح شاشة تفاصيل المشروع ──────────────────────
     'projectDetails': {
       'ar': 'تفاصيل المشروع',
       'en': 'Project Details',
@@ -2235,6 +2234,32 @@ class BannaaLocalizations {
           'Les prix sont estimatifs et varient selon le fournisseur. Consultez un ingénieur.',
       'tr':
           'Fiyatlar tahminidir ve tedarikçiye göre değişir. Uzman bir mühendise danışın.'
+    },
+    // ── مفاتيح شاشة إدخال الأبعاد ────────────────────────
+    'deleteComponentTitle': {
+      'ar': 'حذف المكوّن',
+      'en': 'Delete component',
+      'fr': 'Supprimer le composant',
+      'tr': 'Bileşeni sil'
+    },
+    'deleteComponentMsg': {
+      'ar': 'سيتم حذف هذا المكوّن نهائياً.',
+      'en': 'This component will be permanently deleted.',
+      'fr': 'Ce composant sera définitivement supprimé.',
+      'tr': 'Bu bileşen kalıcı olarak silinecek.'
+    },
+    // ── مفاتيح شاشة النتائج ───────────────────────────────
+    'requestQuoteBtn': {
+      'ar': 'اطلب عرض سعر من مورّد',
+      'en': 'Request supplier quote',
+      'fr': 'Demander un devis fournisseur',
+      'tr': 'Tedarikçiden teklif iste'
+    },
+    'ofTotal': {
+      'ar': 'من الإجمالي',
+      'en': 'of total',
+      'fr': 'du total',
+      'tr': 'toplam'
     },
   };
 
