@@ -215,7 +215,7 @@ class PriceSheet {
   final String currencySymbol;
   final DateTime lastUpdated;
 
-  const PriceSheet(
+  PriceSheet(
       {this.cementPerBag = 50.0,
       this.sandPerM3 = 150.0,
       this.gravelPerM3 = 180.0,
@@ -223,7 +223,7 @@ class PriceSheet {
       this.waterPerM3 = 5.0,
       this.currencySymbol = 'ر.س',
       DateTime? lastUpdated})
-      : lastUpdated = lastUpdated ?? const _DefaultDate();
+      : lastUpdated = lastUpdated ?? DateTime.now();
 
   Map<String, dynamic> toMap() => {
         'cementPerBag': cementPerBag,
@@ -245,13 +245,6 @@ class PriceSheet {
       lastUpdated: m['lastUpdated'] != null
           ? DateTime.tryParse(m['lastUpdated'])
           : null);
-}
-
-class _DefaultDate implements DateTime {
-  const _DefaultDate();
-  DateTime get _default => DateTime.now();
-  @override
-  dynamic noSuchMethod(Invocation i) => DateTime.now();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -307,7 +300,7 @@ class Project {
     final g = grade ?? concreteGrade ?? ConcreteGrade.C20;
     final r =
         reinforcement ?? reinforcementType ?? ReinforcementType.traditional;
-    final p = prices ?? priceSheet ?? const PriceSheet();
+    final p = prices ?? priceSheet ?? PriceSheet();
     final v = totalVolume;
 
     if (v <= 0) return [];
@@ -372,7 +365,6 @@ class Project {
 
   // ── التكلفة حسب المرحلة ───────────────────────────────────
   Map<ProjectPhase, double> get costByPhase {
-    final materials = calculateMaterials();
     final total = totalCost;
     final result = <ProjectPhase, double>{};
 

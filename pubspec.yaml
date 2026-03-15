@@ -38,6 +38,8 @@ dependencies:
   firebase_auth: ^5.3.1
   google_sign_in: ^6.2.1
   cloud_firestore: ^5.4.4
+  firebase_crashlytics: ^4.3.10
+  firebase_analytics: ^11.3.1
 
   # ══ ميزة الإسقاط الجوي ══════════════════════════════════
   google_maps_flutter: ^2.9.0       # خرائط Google التفاعلية
@@ -54,5 +56,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/

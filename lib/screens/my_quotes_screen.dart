@@ -12,7 +12,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/quote_request_model.dart';
 import '../services/firestore_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/common_widgets.dart';
 
 class MyQuotesScreen extends StatelessWidget {
   const MyQuotesScreen({super.key});
@@ -291,27 +290,6 @@ class _QuoteCard extends StatelessWidget {
         end: 0,
         delay: Duration(milliseconds: index * 80),
         duration: 350.ms);
-  }
-
-  Future<void> _updateStatus(
-      BuildContext context, QuoteStatus newStatus) async {
-    try {
-      await FirestoreService.updateQuoteStatusByUser(
-        quoteId: request.id,
-        supplierId: request.supplierId,
-        newStatus: newStatus.name,
-      );
-    } catch (_) {}
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(newStatus == QuoteStatus.accepted
-              ? '✅ تم قبول العرض'
-              : '❌ تم رفض العرض'),
-          backgroundColor: newStatus == QuoteStatus.accepted
-              ? AppTheme.success
-              : AppTheme.danger,
-          behavior: SnackBarBehavior.floating));
-    }
   }
 
   Color _statusColor(QuoteStatus s) {

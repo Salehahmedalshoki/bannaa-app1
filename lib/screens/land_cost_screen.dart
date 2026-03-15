@@ -3,7 +3,6 @@
 //  💰 حساب الكميات والتكاليف التفصيلية لمشروع البناء
 // ══════════════════════════════════════════════════════════
 
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -110,7 +109,6 @@ class _LandCostScreenState extends State<LandCostScreen>
     final area = widget.length * widget.width;
     final totalArea = area * widget.floors;
     final wallArea = 2 * (widget.length + widget.width) * 3.0 * widget.floors;
-    final floorH = 3.0; // ارتفاع الدور
 
     // ── معامل التعقيد حسب الاستخدام ──
     final complexFactor = widget.buildingUse == 'تجاري'
@@ -556,7 +554,6 @@ class _LandCostScreenState extends State<LandCostScreen>
   }
 
   List<Map<String, dynamic>> _buildPhases() {
-    final baseWeeks = widget.floors * 8 + 4;
     return [
       {
         'phase': 1,

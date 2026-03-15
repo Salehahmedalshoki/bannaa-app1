@@ -1067,32 +1067,6 @@ class _MapActionBtn extends StatelessWidget {
   }
 }
 
-class _Chip extends StatelessWidget {
-  final String icon, text;
-  final bool green;
-  const _Chip({required this.icon, required this.text, this.green = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = green ? AppTheme.success : AppTheme.accent;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Text(icon, style: const TextStyle(fontSize: 11)),
-        const SizedBox(width: 4),
-        Text(text,
-            style: GoogleFonts.cairo(
-                fontSize: 11, color: color, fontWeight: FontWeight.w700)),
-      ]),
-    );
-  }
-}
-
 class _Stat extends StatelessWidget {
   final String icon, label, value;
   final bool accent;

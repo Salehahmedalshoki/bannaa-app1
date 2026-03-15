@@ -18,7 +18,6 @@ import '../providers/app_settings_provider.dart';
 import '../services/firestore_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/app_localizations.dart';
-import '../widgets/common_widgets.dart';
 import 'new_project_screen.dart';
 import 'project_detail_screen.dart';
 

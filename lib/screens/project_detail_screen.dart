@@ -86,13 +86,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
     final newProject =
         await FirestoreService.duplicateProject(_project, newName);
 
-    if (mounted && newProject != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(t.tr('projectDuplicated') ?? 'تم نسخ المشروع'),
-        backgroundColor: AppTheme.success,
-        behavior: SnackBarBehavior.floating,
-      ));
-    }
+    if (!mounted || newProject == null) return;
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(t.tr('projectDuplicated')),
+      backgroundColor: AppTheme.success,
+      behavior: SnackBarBehavior.floating,
+    ));
   }
 
   @override
@@ -364,8 +364,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen>
 class _OverviewTab extends StatelessWidget {
   final Project project;
   final List<MaterialQuantity> materials;
-  const _OverviewTab(
-      {super.key, required this.project, required this.materials});
+  const _OverviewTab({required this.project, required this.materials});
 
   @override
   Widget build(BuildContext context) {
@@ -493,8 +492,7 @@ class _OverviewTab extends StatelessWidget {
 class _ComponentsTab extends StatelessWidget {
   final Project project;
   final VoidCallback onEdit;
-  const _ComponentsTab(
-      {super.key, required this.project, required this.onEdit});
+  const _ComponentsTab({required this.project, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -607,7 +605,7 @@ class _ComponentsTab extends StatelessWidget {
 class _CostTab extends StatelessWidget {
   final Project project;
   final List<MaterialQuantity> materials;
-  const _CostTab({super.key, required this.project, required this.materials});
+  const _CostTab({required this.project, required this.materials});
 
   @override
   Widget build(BuildContext context) {
@@ -692,7 +690,7 @@ class _CostTab extends StatelessWidget {
 class _CostBar extends StatelessWidget {
   final MaterialQuantity m;
   final double percent;
-  const _CostBar({super.key, required this.m, required this.percent});
+  const _CostBar({required this.m, required this.percent});
 
   @override
   Widget build(BuildContext context) {
@@ -741,7 +739,6 @@ class _StatBox extends StatelessWidget {
   final String label, value, unit, icon;
   final Color color;
   const _StatBox({
-    super.key,
     required this.label,
     required this.value,
     required this.unit,
@@ -792,7 +789,7 @@ class _StatBox extends StatelessWidget {
 // ══════════════════════════════════════════════════════════
 class _MaterialRow extends StatelessWidget {
   final MaterialQuantity m;
-  const _MaterialRow({super.key, required this.m});
+  const _MaterialRow({required this.m});
 
   @override
   Widget build(BuildContext context) {

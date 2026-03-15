@@ -1085,7 +1085,7 @@ class _StatCard extends StatelessWidget {
 
 // ✅ #7 — const constructors
 class _EmptyOrders extends StatelessWidget {
-  const _EmptyOrders({super.key});
+  const _EmptyOrders();
 
   @override
   Widget build(BuildContext context) => Center(
@@ -1108,7 +1108,7 @@ class _EmptyOrders extends StatelessWidget {
 
 // ✅ #7 — const constructors
 class _EmptyOffers extends StatelessWidget {
-  const _EmptyOffers({super.key});
+  const _EmptyOffers();
 
   @override
   Widget build(BuildContext context) => Center(

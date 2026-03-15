@@ -18,7 +18,6 @@ import '../models/project_model.dart';
 import '../models/quote_request_model.dart';
 import '../services/firestore_service.dart';
 import '../theme/app_theme.dart';
-import '../utils/app_localizations.dart';
 
 class QuoteRequestSheet extends StatefulWidget {
   final Project project;

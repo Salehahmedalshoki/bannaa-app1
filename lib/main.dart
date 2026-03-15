@@ -3,6 +3,9 @@
 // ══════════════════════════════════════════════════════════
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -14,6 +17,8 @@ import 'theme/app_theme.dart';
 import 'utils/app_localizations.dart';
 import 'screens/splash_screen.dart';
 
+FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -21,6 +26,13 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // ── تهيئة Crashlytics ────────────────────────────────
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+
+  // ── تهيئة Analytics ───────────────────────────────────
+  // تعطيل Analytics في وضع Debug
+  await analytics.setAnalyticsCollectionEnabled(kReleaseMode);
 
   // ── تهيئة التخزين المحلي (للـ Offline) ───────────────
   await StorageService.init();
