@@ -3,17 +3,78 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
+    // ══════════════════════════════════════════════════════════
+    //  المستخدمون (Users)
+    // ══════════════════════════════════════════════════════════
+    
+    // المستخدمون - قراءة/كتابة بياناته الخاصة فقط
+    match /users/{userId} {
+      // قراءة البيانات الشخصية للمستخدم نفسه فقط
+      allow read: if request.auth != null && request.auth.uid == userId;
+      // كتابة بياناته الخاصة فقط
+      allow write: if request.auth != null && request.auth.uid == userId;
+      
+      // المشاريع - للمستخدم نفسه فقط
+      match /projects/{projectId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // طلبات العروض - للمستخدم نفسه فقط
+      match /quote_requests/{requestId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // طلبات المواد - للمستخدم نفسه فقط
+      match /orders/{orderId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // عروض المشاريع - للمستخدم نفسه فقط
+      match /project_offers/{offerId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  الموردون (Suppliers)
+    // ══════════════════════════════════════════════════════════
+    
+    // بيانات المورد - للمورد نفسه فقط
+    match /suppliers/{supplierId} {
+      allow read, write: if request.auth != null && request.auth.uid == supplierId;
+      
+      // مواد المورد
+      match /materials/{materialId} {
+        allow read, write: if request.auth != null && request.auth.uid == supplierId;
+      }
+      
+      // العروض المرسلة
+      match /sent_offers/{offerId} {
+        allow read, write: if request.auth != null && request.auth.uid == supplierId;
+      }
+      
+      // الطلبات المستلمة
+      match /received_orders/{orderId} {
+        allow read, write: if request.auth != null && request.auth.uid == supplierId;
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  القراءة العامة (للتطبيق)
+    // ══════════════════════════════════════════════════════════
+    
+    // قراءة قائمة الموردين (للعام) - إذا كان هناكSuch a collection exists
+    match /public_suppliers/{supplierId} {
+      allow read: if true;
+    }
+
+    // ══════════════════════════════════════════════════════════
+    //  Rules الافتراضية
+    // ══════════════════════════════════════════════════════════
+    
+    // رفض كل العمليات الأخرى
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2026, 4, 11);
+      allow read, write: if false;
     }
   }
 }
